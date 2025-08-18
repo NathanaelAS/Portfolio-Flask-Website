@@ -3,3 +3,8 @@
     padding: 0.6em 1em;
     border-radius: 0.6rem;
   }
+
+th, td{
+  border: 2px, solid, black;
+}
+
