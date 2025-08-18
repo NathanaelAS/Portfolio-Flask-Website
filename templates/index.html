@@ -18,7 +18,7 @@
 	  <div class="container">
 		<h1 class="display-4 fw-bold introTyping" id="introTyping">Hi, I'm Nathanael Spear</h1>
 		<p class="lead mt-3">Backend-focused software developer building tools with Python, Flask, and Google Apps Script.</p>
-		<a href="/projects" class="btn btn-primary btn-lg mt-4">View My Projects</a>
+		<a href="{{ url_for('projects.projectOverview_page') }}" class="btn btn-primary btn-lg mt-4">View My Projects</a>
 	  </div>
 	</section>
 
@@ -50,7 +50,7 @@
 				<span class="badge bg-secondary me-1 badge-lg" >PDFPlumber</span>
 			  </div>
 			  <div class="card-footer bg-white border-0">
-				<a href="/project1" class="btn btn-outline-primary w-100">View Project</a>
+				<a href="{{ url_for('projects.project1_page') }}" class="btn btn-outline-primary w-100">View Project</a>
 			  </div>
 			</div>
 		  </div>

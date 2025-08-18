@@ -1,29 +1,11 @@
 from flask import Flask, render_template
+from routes.pages import pages_bp
+from routes.projects import projects_bp
 
 app = Flask(__name__)
 
-@app.route('/')
-def home_page():
-    return render_template('index.html', active_page='home')
-
-@app.route('/projects')
-def projectOverview_page():
-    return render_template('projects.html', active_page='projects')
-    
-@app.route('/project1')
-def projectPDFReader_page():
-    return render_template('project1.html', active_page='project1')
-
-@app.route('/contact')
-def contact_page():
-    return render_template('contact.html', active_page='contact')
-
-@app.route('/about')
-def about_page():
-    return render_template('about.html', active_page='about')
-
-
-
+app.register_blueprint(pages_bp)
+app.register_blueprint(projects_bp)
 
 
 # Run the application

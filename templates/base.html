@@ -20,25 +20,25 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <a class="nav-link {% if active_page == 'home' %}active{% endif %}" href="/">Home</a>
+          <a class="nav-link {% if active_page == 'home' %}active{% endif %}" href="{{ url_for('pages.home_page') }}">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if active_page == 'about' %}active{% endif %}" href="/about">About</a>
+          <a class="nav-link {% if active_page == 'about' %}active{% endif %}" href="{{ url_for('pages.about_page') }}">About</a>
         </li>
 		<li class="nav-item dropdown">
-			<a class="nav-link {% if active_page in ['projects', 'project1'] %}active{% endif %} dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			<a class="nav-link {% if active_page in ['projectOverview', 'project1'] %}active{% endif %} dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 			Projects
 			</a>
 			<ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="navbarDropdown">
-				<li><a class="dropdown-item fw-bold" href="/projects">Overview</a></li>
+				<li><a class="dropdown-item fw-bold" href="{{ url_for('projects.projectOverview_page') }}">Overview</a></li>
 				<li><hr class="dropdown-divider"></li>
-				<li><a class="dropdown-item" href="/project1">Project 1</a></li>
+				<li><a class="dropdown-item" href="{{ url_for('projects.project1_page') }}">Project 1</a></li>
 				<li><a class="dropdown-item" href="#">Project 2</a></li>
 				<li><a class="dropdown-item" href="#">Project 3</a></li>
 			</ul>
 		</li>
         <li class="nav-item">
-          <a class="nav-link {% if active_page == 'contact' %}active{% endif %}" href="/contact">Contact</a>
+          <a class="nav-link {% if active_page == 'contact' %}active{% endif %}" href="{{ url_for('pages.contact_page') }}">Contact</a>
         </li>
       </ul>
     </div>
