@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+
+{% block title %}My Portfolio{% endblock %}
+
+{% block styles %}
+	<style>
+		.introTyping {
+			display: inline-block;
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+	<!-- Page Content -->
+	<!-- Hero Section -->
+	<section class="bg-dark text-white py-5 text-center">
+	  <div class="container">
+		<h1 class="display-4 fw-bold introTyping" id="introTyping">Hi, I'm Nathanael Spear</h1>
+		<p class="lead mt-3">Backend-focused software developer building tools with Python, Flask, and Google Apps Script.</p>
+		<a href="/projects" class="btn btn-primary btn-lg mt-4">View My Projects</a>
+	  </div>
+	</section>
+
+	<div class="container mt-5">
+	  <h1>Welcome to My Portfolio</h1>
+	  <p>This site showcases my work as a software developer. Check out my projects!</p>
+	  <br>
+	</div>
+
+	<!-- Featured Projects Section -->
+	<section class="py-5 bg-light" id="projects">
+	  <div class="container">
+		<h2 class="text-center mb-5">Featured Projects</h2>
+		<div class="row">
+		  <!-- Project Card 1 -->
+		  <div class="col-md-4 mb-4">
+			<div class="card h-100 shadow-sm">
+			  <div class="card-body">
+				<h5 class="card-title">Project 1</h5>
+				<p class="card-text">Testing</p>
+				<span class="badge bg-secondary me-1 badge-lg">	
+					<i class="devicon-python-plain"></i>
+					Python
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg">
+					<i class="devicon-flask-original"></i>
+					Flask
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg" >PDFPlumber</span>
+			  </div>
+			  <div class="card-footer bg-white border-0">
+				<a href="/project1" class="btn btn-outline-primary w-100">View Project</a>
+			  </div>
+			</div>
+		  </div>
+		  
+		  <!-- Project Card 2 -->
+		  <div class="col-md-4 mb-4">
+			<div class="card h-100 shadow-sm">
+			  <div class="card-body">
+				<h5 class="card-title">Project 2</h5>
+				<p class="card-text">Testing</p>
+				<span class="badge bg-secondary me-1 badge-lg">	
+					<i class="devicon-python-plain"></i>
+					Python
+				</span>
+				<span class="badge bg-secondary badge-lg">
+					<i class="devicon-pandas-plain"></i>
+					Pandas
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg" >PDFPlumber</span>
+			  </div>
+			  <div class="card-footer bg-white border-0">
+				<a href="#" class="btn btn-outline-primary w-100">View Project</a>
+			  </div>
+			</div>
+		  </div>
+		  
+		  <!-- Project Card 3 -->
+		  <div class="col-md-4 mb-4">
+			<div class="card h-100 shadow-sm">
+			  <div class="card-body">
+				<h5 class="card-title text-muted">Project 3 <span class="badge bg-warning text-dark">Coming Soon</span></h5>
+				<p class="card-text"></p>
+				<span class="badge bg-secondary me-1 badge-lg"></span>
+				<span class="badge bg-secondary badge-lg"></span>
+			  </div>
+			  <div class="card-footer bg-white border-0">
+				<a href="#" class="btn btn-outline-primary w-100">View Project</a>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</section>
+{% endblock %}
+
+{% block scripts %}
+	<script>
+		var charactersTyped = 0;
+		const introElement = document.getElementById('introTyping')
+		const introText = introElement.innerText;
+		var charOffsetTime = 100;
+		document.getElementById('introTyping').innerText = ''
+
+		introElement.style.borderRight = '3px solid white'
+		function typingIntroduction() {
+			if (charactersTyped<introText.length) {
+				introElement.innerHTML += introText.charAt(charactersTyped);
+				charactersTyped++;
+				setTimeout(typingIntroduction, charOffsetTime);
+			}else {introElement.style.border = 'none'}
+		}
+		document.addEventListener('DOMContentLoaded', typingIntroduction);
+	</script>
+{% endblock %}

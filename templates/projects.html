@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Projects Overview{% endblock %}
+
+{% block content %}
+	<div class='py-3 bg-light text-center'>
+		<h1 class='mt-3'>Projects Overview</h1>
+		<p class="lead mt-3">I build practical backend tools and automations with Python, Flask, and Google Apps Script.<br>Here’s a snapshot of my recent work.</p>
+		<hr class="mt-5">
+	</div>
+
+
+	<section class="py-5 bg-light mb-4" id="projects">
+	  <div class="container">
+		<h2 class="text-center mb-5">Projects</h2>
+		<div class="row">
+		  <!-- Project Card 1 -->
+		  <div class="col-md-4 mb-4">
+			<div class="card h-100 shadow-sm">
+			  <div class="card-body">
+				<h5 class="card-title">
+					<i class="devicon-python-plain colored me-1"></i> Project 1
+				</h5>
+				<p class="card-text">Testing</p>
+				<span class="badge bg-secondary me-1 badge-lg">	
+					<i class="devicon-python-plain"></i>
+					Python
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg">
+					<i class="devicon-flask-original"></i>
+					Flask
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg" >PDFPlumber</span>
+			  </div>
+			  <div class="card-footer bg-white border-0">
+				<a href="/project1" class="btn btn-outline-primary w-100">View Project</a>
+			  </div>
+			</div>
+		  </div>
+		  
+		  <!-- Project Card 2 -->
+		  <div class="col-md-4 mb-4">
+			<div class="card h-100 shadow-sm">
+			  <div class="card-body">
+				<h5 class="card-title">
+					<i class="devicon-python-plain colored me-1"></i>
+					Project 2
+				</h5>
+				<p class="card-text">Testing</p>
+				<span class="badge bg-secondary me-1 badge-lg">	
+					<i class="devicon-python-plain"></i>
+					Python
+				</span>
+				<span class="badge bg-secondary badge-lg">
+					<i class="devicon-pandas-plain"></i>
+					Pandas
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg" >PDFPlumber</span>
+			  </div>
+			  <div class="card-footer bg-white border-0">
+				<a href="#" class="btn btn-outline-primary w-100">View Project</a>
+			  </div>
+			</div>
+		  </div>
+		  
+		  <!-- Project Card 3 -->
+		  <div class="col-md-4 mb-4">
+			<div class="card h-100 shadow-sm">
+			  <div class="card-body">
+				<h5 class="card-title text-muted">Project 3 <span class="badge bg-warning text-dark">Coming Soon</span></h5>
+				<p class="card-text"></p>
+				<span class="badge bg-secondary me-1 badge-lg"></span>
+				<span class="badge bg-secondary badge-lg"></span>
+			  </div>
+			  <div class="card-footer bg-white border-0">
+				<a href="#" class="btn btn-outline-primary w-100">View Project</a>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	  </div>
+	</section>
+
+	<!-- Tech Stack Legend -->
+
+	<div class="container text-center">
+	  <h5 class="mb-4">Tech Stack Legend</h5>
+	  <div class="d-flex flex-wrap justify-content-center gap-3">
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-python-plain colored me-1"></i> Python
+		</span>
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-flask-original-wordmark me-1"></i> Flask
+		</span>
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-javascript-plain colored me-1"></i> JavaScript
+		</span>
+		<span class="badge bg-secondary badge-lg"
+			data-bs-toggle="tooltip"
+			data-bs-placement="top"
+			title="PDFPlumber: Extract tables and text from PDFs with precision.">
+			PDFPlumber
+		</span>
+		<span class="badge bg-secondary badge-lg">Google Apps Script</span>
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-nodejs-plain colored me-1"></i> Node.js
+		</span>
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-mongodb-plain-wordmark colored me-1"></i> MongoDB
+		</span>
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-java-plain-wordmark colored me-1"></i> Java
+		</span>
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-spring-plain-wordmark colored me-1"></i> Spring Boot
+		</span>
+		<span class="badge bg-secondary badge-lg">
+		  <i class="devicon-pandas-plain"></i> Pandas
+		</span>
+	  </div>
+	</div>
+{% endblock %}
+
+{% block footerreplace %}
+	<footer class="text-center mt-5 mb-3 text-muted">
+	  <p>Like what you see? <a href="/contact">Let’s connect →</a></p>
+	  © 2025 Nathanael Spear
+	</footer>
+{% endblock %}
+
+{% block scripts %}
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+		  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+		  tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+		});
+	</script>
+{% endblock %}
+

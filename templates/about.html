@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block styles %}
+	<style>
+		.tech-stack-card-image {
+            display: block; /* Makes them block-level to apply margin auto */
+            margin: 0 auto 0.5rem auto; /* Centers and adds bottom margin */
+            /* Add this if you want consistent vertical alignment within the card-header area */
+            line-height: 1; /* For font icons, helps remove extra space above/below */
+        }
+		.tech-stack-card-image[src] { /* Targets img with a src attribute */
+            max-width: 80px; /* Your desired width */
+            height: auto;    /* Maintain aspect ratio */
+        }
+		i.tech-stack-card-image{ /* Target i tags with the class or general i tags */
+            font-size: 80px; /* Set font-size to match the max-width of your images */
+            width: 80px; /* Give it an explicit width so it's centered correctly */
+            height: 80px; /* Give it an explicit height for consistent vertical spacing */
+            display: flex; /* Use flexbox to center content if needed */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            /* Remove 'colored' class from HTML if you want to control color here */
+        }
+		.card-body {
+			padding-top: 0rem;
+			padding-bottom: 0rem; /* Reduce default 1.25rem to something smaller */
+			/* Or you can specify all paddings if you want: */
+			/* padding: 1.25rem 1.25rem 0.5rem 1.25rem; */
+		}
+		.gradient-border-box {
+			color: black;
+			border: 3px solid transparent;
+            border-radius: 15px; /* Optional: for rounded corners */
+
+			background: 
+				linear-gradient(white, white) padding-box,
+				linear-gradient(135deg, red, blue) border-box;
+			
+			box-shadow: 2px 2px 5px black;
+		}
+		.fade-in-card {
+			opacity: 0;
+			transform: translateY(20px);
+			transition: opacity 0.5s ease-out, transform 0.6s ease-out;
+		}
+		.fade-in-card.is-visible {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+    <div class='py-3 bg-light text-center'>
+		<h1 class='mt-3'>About</h1>
+	</div>
+
+	<div class="container my-5">
+		<div class="row align-items-center">
+			<div class="col-md-6 text-center">
+				<img src="" class="w-25 mb-5">
+				<p class="lead mb-4"><strong>My name is Nathanael.</strong><br> I'm an aspiring software developer who enjoys building new projects and continuously expanding my programming knowledge.</p>
+			</div>
+
+			<div class="col-md-6">
+				<div class="row">
+					<div class="col-md-6 mb-4">
+						<div class="card h-100 w-75 gradient-border-box mx-auto fade-in-card">
+							<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" class="tech-stack-card-image mt-1 mb-0" alt="Python Logo">
+							<div class="card-body text-center">
+								<h5 class="card-title">Python</h5>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-6 mb-4">
+						<div class="card h-100 w-75 gradient-border-box mx-auto fade-in-card">		
+            				<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" class="tech-stack-card-image mt-1 mb-0" alt="HTML Logo">
+							<div class="card-body text-center">
+								<h5 class="card-title">HTML</h5>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-6 mb-4">
+						<div class="card h-100 w-75 gradient-border-box mx-auto fade-in-card">		
+            				<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg" class="tech-stack-card-image mt-1 mb-0" alt="CSS Logo">
+							<div class="card-body text-center">
+								<h5 class="card-title">CSS</h5>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-6 mb-4">
+						<div class="card h-100 w-75 gradient-border-box mx-auto fade-in-card">		
+            				<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" class="tech-stack-card-image mt-1 mb-0" alt="Javascript Logo">
+							<div class="card-body text-center">
+								<h5 class="card-title">JavaScript</h5>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-6 mb-4">
+						<div class="card h-100 w-75 gradient-border-box mx-auto fade-in-card">		
+            				<i class="tech-stack-card-image devicon-flask-original mt-1 mb-0"></i>
+							<div class="card-body text-center">
+								<h5 class="card-title">Flask</h5>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-6 mb-4">
+						<div class="card h-100 w-75 gradient-border-box mx-auto fade-in-card">		
+            				<img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg" class="tech-stack-card-image mt-1 mb-0" alt="Visual Studio Code Logo">
+							<div class="card-body text-center">
+								<h5 class="card-title">VS Code</h5>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+{% endblock %}
+
+{% block footeraddition %}
+	<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
+{% endblock %}
+
+{% block scripts %}
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const fadeElements = document.querySelectorAll('.fade-in-card');
+			fadeElements.forEach((el, index) => {
+				setTimeout(() => {
+					el.classList.add('is-visible');
+				}, index * 100); // Stagger by 100ms for each card
+			});
+		});
+	</script>
+{% endblock %}
