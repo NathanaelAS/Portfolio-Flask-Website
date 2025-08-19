@@ -8,8 +8,8 @@ projects_bp = Blueprint('projects', __name__, url_prefix='/projects')
 def projectOverview_page():
     return render_template('projects/projectOverview.html', active_page = 'projectOverview')
 
-@projects_bp.route('/project1', methods = ['POST', 'GET'])
-def project1_page():
+@projects_bp.route('/taskManager', methods = ['POST', 'GET'])
+def taskManager_page():
     if request.method == 'POST':
         task_content = request.form["content"]
         new_task = TodoList(content = task_content)
@@ -17,27 +17,27 @@ def project1_page():
         try:
             db.session.add(new_task)
             db.session.commit()
-            return redirect(url_for('projects.project1_page'))
+            return redirect(url_for('projects.taskManager_page'))
         except:
             return "There was an issue adding your task"
         
 
     else:
         tasks = TodoList.query.order_by(TodoList.date_created).all()
-        return render_template('projects/project1/project1.html', active_page = 'project1', tasks = tasks)
+        return render_template('projects/taskManager/taskManager.html', active_page = 'taskManager', tasks = tasks)
     
-@projects_bp.route('/project1/delete/<int:id>')
+@projects_bp.route('/taskManager/delete/<int:id>')
 def delete(id):
     task_to_delete = TodoList.query.get_or_404(id)
 
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect(url_for('projects.project1_page'))
+        return redirect(url_for('projects.taskManager_page'))
     except:
         return 'There was a problem deleting that task'
     
-@projects_bp.route('/project1/update/<int:id>', methods=['GET', 'POST'])
+@projects_bp.route('/taskManager/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
     task = TodoList.query.get_or_404(id)
     if request.method == 'POST':
@@ -45,10 +45,16 @@ def update(id):
 
         try:
             db.session.commit()
-            return redirect(url_for('projects.project1_page'))
+            return redirect(url_for('projects.taskManager_page'))
         except:
             return "There was an issue updating your task"
         
     else:
-        return render_template('projects/project1/update.html', active_page = 'project1', task=task)
+        return render_template('projects/taskManager/update.html', active_page = 'taskManager', task=task)
     
+@projects_bp.route('/schedulingCalendar', methods = ['POST', 'GET'])
+def schedulingCalendar_page():
+    if request.method == 'POST':
+        pass
+    else:
+        return render_template('projects/schedulerproject/scheduler.html', active_page = 'schedulingCalendar')

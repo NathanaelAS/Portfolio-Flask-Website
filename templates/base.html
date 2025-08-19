@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>{% block title %}My Webpage{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   {% block styles %}{% endblock %}
@@ -26,14 +27,14 @@
           <a class="nav-link {% if active_page == 'about' %}active{% endif %}" href="{{ url_for('pages.about_page') }}">About</a>
         </li>
 		<li class="nav-item dropdown">
-			<a class="nav-link {% if active_page in ['projectOverview', 'project1'] %}active{% endif %} dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			<a class="nav-link {% if active_page in ['projectOverview', 'taskManager', 'schedulingCalendar'] %}active{% endif %} dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 			Projects
 			</a>
 			<ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="navbarDropdown">
 				<li><a class="dropdown-item fw-bold" href="{{ url_for('projects.projectOverview_page') }}">Overview</a></li>
 				<li><hr class="dropdown-divider"></li>
-				<li><a class="dropdown-item" href="{{ url_for('projects.project1_page') }}">Project 1</a></li>
-				<li><a class="dropdown-item" href="#">Project 2</a></li>
+				<li><a class="dropdown-item" href="{{ url_for('projects.taskManager_page') }}">Task Manager</a></li>
+				<li><a class="dropdown-item" href="{{ url_for('projects.schedulingCalendar_page') }}">Scheduling Calendar</a></li>
 				<li><a class="dropdown-item" href="#">Project 3</a></li>
 			</ul>
 		</li>
