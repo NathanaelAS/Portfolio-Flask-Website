@@ -16,6 +16,21 @@
             padding-left: 1em;
             padding-right: 1em;
         }
+        .color-square {
+            padding: 0;
+            width: 25px;
+            height: 25px;
+            box-sizing: border-box;
+        }
+        #event-time-option{
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .show-time-options{
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 {% endblock %}
 
@@ -26,20 +41,153 @@
 
     <div id='calendar'></div>
 
+    <div id="event-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Event</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="event-form">
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <label for="event-title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="event-title">
+                            </div>
+                            <div class="mb-3">
+                                <label for="event-start-date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="event-start-date">
+                            </div>
+                            <div class="mb-3">
+                                <label for="event-end-date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="event-end-date">
+                            </div>
+                            <button class="btn btn-primary mb-3" id="add-time-btn-modal">
+                                <i class="fa-solid fa-clock me-2"></i>Add Time
+                            </button>
+
+                            <div id="event-time-option">
+                                <div class="mb-3">
+                                    <label for="event-start-time" class="form-label">Start Time</label>
+                                    <input type="text" class="form-control time_picker" id="event-start-time" placeholder="Select Start Time">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="event-end-time" class="form-label">End Time</label>
+                                    <input type="text" class="form-control time_picker" id="event-end-time" placeholder="Select End Time">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="event-color" class="form-label">Color</label>
+                                <input type="color" class="form-control color-square" id="event-color-picker" value="#007bff">
+                            </div>
+                            <div class="mb-3">
+                                <label for="event-description" class="form-label">Description</label>
+                                <textarea name="description" id="event-description" rows="2" class="form-control"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="event-url" class="form-label">URL</label>
+                                <input type="text" class="form-control" id="event-url">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-modal-btn">Close</button>
+                    <button type="button" class="btn btn-primary" id="add-event-btn">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.19/index.global.min.js"></script>
     <script>
+        flatpickr('.time_picker', {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: 'h:i K',
+            time_24hr: false,
+            minuteIncrement: 15
+        })
+    </script>
+    <script>
+        selected_start_date = null;
+        selected_end_date = null;
 
       document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth',
-          themeSystem: 'bootstrap5'
+            customButtons: {
+                addEventButton: {
+                    text: 'Add Event',
+                    click: function() {
+                        if(selected_start_date && selected_end_date){
+                            var myModal = new bootstrap.Modal(document.getElementById('event-modal'));
+                            myModal.show();
+
+                            document.getElementById('event-start-date').value = selected_start_date
+                            document.getElementById('event-end-date').value = selected_end_date
+                        }
+                        else{
+                            // will need to change this to a custom modal instead of alert
+                            alert('You need to select a date or date range before attempting to add an event')
+                        }
+                        
+                    }
+                }
+            },
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay addEventButton'
+            },
+            initialView: 'dayGridMonth',
+            themeSystem: 'bootstrap5',
+            selectable: true,
+            select: function(info) {
+                var endDate = new Date(info.end);
+                endDate.setDate(endDate.getDate()-1);
+                selected_start_date = info.startStr;
+                selected_end_date = endDate.toISOString().split('T')[0];
+            }
         });
         calendar.render();
+      });
+
+      var addEventButton_Modal = document.getElementById('add-event-btn');
+      var close_Modal_button = document.getElementById('close-modal-btn');
+      var eventModelElement = document.getElementById('event-modal');
+
+      var eventForm = document.getElementById('event-form');
+
+      // runs if users click off of the Adding Event Modal instead of using the close button
+      eventModelElement.addEventListener('hide.bs.modal', function(){
+        eventForm.reset();
+        selected_start_date=null;
+        selected_end_date=null;
+      });
+      // runs if users click on the close button on the Adding Event Modal
+      close_Modal_button.addEventListener('click', function(){
+        eventForm.reset();
+        selected_start_date=null;
+        selected_end_date=null;
+      });
+      // runs if users click on the Add Event button within the Modal to check and finalize adding user input to the database
+      addEventButton_Modal.addEventListener('click', function(){
+
+      });
+
+      var addTimeButton_Modal = document.getElementById('add-time-btn-modal');
+      var eventTimeOptions_Modal = document.getElementById('event-time-option');
+
+      addTimeButton_Modal.addEventListener('click', function(event){
+        event.preventDefault();
+        addTimeButton_Modal.style.display = 'none';
+        eventTimeOptions_Modal.classList.add('show-time-options');
       });
 
     </script>

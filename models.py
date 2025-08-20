@@ -12,8 +12,10 @@ class TodoList(db.Model):
 class ScheduleEventList(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(200), nullable = False)
-    start = db.Column(db.DateTime, nullable = False)
-    end = db.Column(db.DateTime, nullable = True)
+    start_date = db.Column(db.Date, nullable = False)
+    end_date = db.Column(db.Date, nullable = True)
+    start_time = db.Column(db.Time, nullable = True)
+    end_time = db.Column(db.Time, nullable = True)
     all_day = db.Column(db.Boolean, nullable = False, default = False)
     description = db.Column(db.String(500), nullable = True)
     url = db.Column(db.String(200), nullable = True)
