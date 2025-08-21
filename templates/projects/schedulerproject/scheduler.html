@@ -22,14 +22,20 @@
             height: 25px;
             box-sizing: border-box;
         }
-        #event-time-option{
+        .hidden-time-options{
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.5s ease-in-out;
+            max-height: 0; /* Collapses the div */
+            padding-top: 0; /* Collapses the padding */
+            padding-bottom: 0; /* Collapses the padding */
+            transition: opacity 0.5s ease-in-out, max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
         }
         .show-time-options{
             opacity: 1;
             visibility: visible;
+            max-height: 500px; /* A value large enough to contain the content */
+            padding-top: 1em; /* You can adjust this padding */
+            padding-bottom: 1em; /* You can adjust this padding */
         }
     </style>
 {% endblock %}
@@ -48,7 +54,7 @@
                     <h5 class="modal-title">Add Event</h5>
                 </div>
                 <div class="modal-body">
-                    <form id="event-form">
+                    <form id="event-form" method="POST" action="{{ url_for('projects.schedulingCalendar_page') }}">
                         <div class="mb-3">
                             <div class="mb-3">
                                 <label for="event-title" class="form-label">Title</label>
@@ -66,14 +72,21 @@
                                 <i class="fa-solid fa-clock me-2"></i>Add Time
                             </button>
 
-                            <div id="event-time-option">
-                                <div class="mb-3">
-                                    <label for="event-start-time" class="form-label">Start Time</label>
-                                    <input type="text" class="form-control time_picker" id="event-start-time" placeholder="Select Start Time">
+                            <!-- this is the optional time div that allows users to choose a start time and end time for their event -->
+                            <div id="event-time-option" class="hidden-time-options">
+                                <div id="event-time-startend-time-options">
+                                    <div class="mb-3">
+                                        <label for="event-start-time" class="form-label">Start Time</label>
+                                        <input type="text" class="form-control time_picker" id="event-start-time" placeholder="Select Start Time">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="event-end-time" class="form-label">End Time</label>
+                                        <input type="text" class="form-control time_picker" id="event-end-time" placeholder="Select End Time">
+                                    </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="event-end-time" class="form-label">End Time</label>
-                                    <input type="text" class="form-control time_picker" id="event-end-time" placeholder="Select End Time">
+                                    <input class="form-check-input" type="checkbox" id="event-all-day-checkbox">
+                                    <label class="form-check-label" for="event-all-day">All Day</label>
                                 </div>
                             </div>
 
@@ -94,7 +107,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-modal-btn">Close</button>
-                    <button type="button" class="btn btn-primary" id="add-event-btn">Add</button>
+                    <button type="submit" class="btn btn-primary" id="add-event-btn" form="event-form">Add</button>
                 </div>
             </div>
         </div>
@@ -106,7 +119,14 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/bootstrap5@6.1.19/index.global.min.js"></script>
     <script>
-        flatpickr('.time_picker', {
+        const startTimePicker = flatpickr('#event-start-time', {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: 'h:i K',
+            time_24hr: false,
+            minuteIncrement: 15
+        })
+        const endTimePicker = flatpickr('#event-end-time', {
             enableTime: true,
             noCalendar: true,
             dateFormat: 'h:i K',
@@ -115,80 +135,188 @@
         })
     </script>
     <script>
+        let calendar;
+
         selected_start_date = null;
         selected_end_date = null;
 
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            customButtons: {
-                addEventButton: {
-                    text: 'Add Event',
-                    click: function() {
-                        if(selected_start_date && selected_end_date){
-                            var myModal = new bootstrap.Modal(document.getElementById('event-modal'));
-                            myModal.show();
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                customButtons: {
+                    addEventButton: {
+                        text: 'Add Event',
+                        click: function() {
+                            if(calendar.view.type === 'dayGridMonth'){
+                                if(selected_start_date && selected_end_date){
+                                var myModal = new bootstrap.Modal(document.getElementById('event-modal'));
+                                myModal.show();
 
-                            document.getElementById('event-start-date').value = selected_start_date
-                            document.getElementById('event-end-date').value = selected_end_date
+                                document.getElementById('event-start-date').value = selected_start_date
+                                document.getElementById('event-end-date').value = selected_end_date
+                                }
+                                else{
+                                    // will need to change this to a custom modal instead of alert
+                                    alert('You need to select a date or date range before attempting to add an event')
+                                }
+                            }
+                            else{
+                                alert('You need to be on the Calendar Month view to be able to add an event')
+                            }
+                            
+                            
                         }
-                        else{
-                            // will need to change this to a custom modal instead of alert
-                            alert('You need to select a date or date range before attempting to add an event')
-                        }
-                        
                     }
+                },
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay addEventButton'
+                },
+                initialView: 'dayGridMonth',
+                themeSystem: 'bootstrap5',
+                selectable: true,
+                select: function(info) {
+                    var endDate = new Date(info.end);
+                    endDate.setDate(endDate.getDate()-1);
+                    selected_start_date = info.startStr;
+                    selected_end_date = endDate.toISOString().split('T')[0];
                 }
-            },
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay addEventButton'
-            },
-            initialView: 'dayGridMonth',
-            themeSystem: 'bootstrap5',
-            selectable: true,
-            select: function(info) {
-                var endDate = new Date(info.end);
-                endDate.setDate(endDate.getDate()-1);
-                selected_start_date = info.startStr;
-                selected_end_date = endDate.toISOString().split('T')[0];
+            });
+            calendar.render();
+        });
+
+        const addEventButton_Modal = document.getElementById('add-event-btn');
+        const close_Modal_button = document.getElementById('close-modal-btn');
+        const eventModalElement = document.getElementById('event-modal');
+
+        const eventForm = document.getElementById('event-form');
+
+        const addTimeButton_Modal = document.getElementById('add-time-btn-modal');
+        const eventTimeOptions_Modal = document.getElementById('event-time-option');
+
+        const eventAllDayCheckbox_Modal = document.getElementById('event-all-day-checkbox');
+        const eventStartEndTimeOptions_Modal = document.getElementById('event-time-startend-time-options');
+
+        const eventTitle_Modal = document.getElementById('event-title');
+        const eventStartDate_Modal = document.getElementById('event-start-date');
+        const eventEndDate_Modal = document.getElementById('event-end-date');
+        const description_Modal = document.getElementById('event-description')
+        const eventColorPicker_Modal = document.getElementById('event-color-picker');
+        const eventUrl_Modal = document.getElementById('event-url');
+        const eventStartTime_Modal = document.getElementById('event-start-time');
+        const eventEndTime_Modal = document.getElementById('event-end-time');
+
+        // runs if users click off of the Adding Event Modal instead of using the close button
+        eventModalElement.addEventListener('hide.bs.modal', function(){
+            eventForm.reset();
+            selected_start_date=null;
+            selected_end_date=null;
+
+            addTimeButton_Modal.style.display = '';
+            eventTimeOptions_Modal.classList.remove('show-time-options');
+        });
+        // runs if users click on the close button on the Adding Event Modal
+        close_Modal_button.addEventListener('click', function(){
+            eventForm.reset();
+            selected_start_date=null;
+            selected_end_date=null;
+        });
+
+        function returnStartEndTimes(){
+            var startTime = null;
+            var endTime = null;
+            if(startTimePicker.selectedDates.length > 0){
+                startTime = startTimePicker.formatDate(startTimePicker.selectedDates[0], 'h:i K');
+            };
+            if(endTimePicker.selectedDates.length > 0){
+                endTime = endTimePicker.formatDate(endTimePicker.selectedDates[0], 'h:i K');
+            };
+            return [startTime,endTime]
+            
+        };
+
+        // runs if users click on the Add Event button within the Modal to check and finalize adding user input to the database
+        addEventButton_Modal.addEventListener('click', function(event){
+            event.preventDefault();
+
+            const eventTitle = eventTitle_Modal.value;
+            const eventStartDate = eventStartDate_Modal.value;
+            const eventEndDate = eventEndDate_Modal.value;
+            const allDay = eventAllDayCheckbox_Modal.checked;
+            const description = description_Modal.value;
+            const url = eventUrl_Modal.value;
+            const color = eventColorPicker_Modal.value;
+
+            const startEndTimes = returnStartEndTimes();
+            const startTime = startEndTimes[0] || null;
+            const endTime = startEndTimes[1] || null;
+
+            const addEventFormData = {
+                title: eventTitle,
+                start_date: eventStartDate,
+                end_date: eventEndDate,
+                start_time: startTime,
+                end_time: endTime,
+                all_day: allDay,
+                description: description,
+                url: url,
+                color: color
+            }
+
+            fetch('/projects/schedulingCalendar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(addEventFormData)
+            })
+            .then(response => {
+                if(!response.ok){
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(newEventData => {
+                calendar.addEvent({
+                    id: newEventData.id,
+                    title: newEventData.title,
+                    start: newEventData.start,
+                    end: newEventData.end,
+                    allDay: newEventData.allDay,
+                    color: newEventData.color,
+                    url: newEventData.url,
+                    description: newEventData.description
+                })
+
+                const modal = bootstrap.Modal.getInstance(eventModalElement);
+                modal.hide();
+            })
+            .catch(error => {
+                console.error('Error:', error)
+            });
+        });
+
+        addTimeButton_Modal.addEventListener('click', function(event){
+            event.preventDefault();
+            addTimeButton_Modal.style.display = 'none';
+            eventTimeOptions_Modal.classList.add('show-time-options');
+
+            if(!eventAllDayCheckbox_Modal.checked){
+                eventStartEndTimeOptions_Modal.classList.remove('hidden-time-options')
             }
         });
-        calendar.render();
-      });
 
-      var addEventButton_Modal = document.getElementById('add-event-btn');
-      var close_Modal_button = document.getElementById('close-modal-btn');
-      var eventModelElement = document.getElementById('event-modal');
-
-      var eventForm = document.getElementById('event-form');
-
-      // runs if users click off of the Adding Event Modal instead of using the close button
-      eventModelElement.addEventListener('hide.bs.modal', function(){
-        eventForm.reset();
-        selected_start_date=null;
-        selected_end_date=null;
-      });
-      // runs if users click on the close button on the Adding Event Modal
-      close_Modal_button.addEventListener('click', function(){
-        eventForm.reset();
-        selected_start_date=null;
-        selected_end_date=null;
-      });
-      // runs if users click on the Add Event button within the Modal to check and finalize adding user input to the database
-      addEventButton_Modal.addEventListener('click', function(){
-
-      });
-
-      var addTimeButton_Modal = document.getElementById('add-time-btn-modal');
-      var eventTimeOptions_Modal = document.getElementById('event-time-option');
-
-      addTimeButton_Modal.addEventListener('click', function(event){
-        event.preventDefault();
-        addTimeButton_Modal.style.display = 'none';
-        eventTimeOptions_Modal.classList.add('show-time-options');
-      });
+        eventAllDayCheckbox_Modal.addEventListener('change', function(){
+            if(this.checked){
+                eventStartEndTimeOptions_Modal.classList.add('hidden-time-options')
+                startTimePicker.clear()
+                endTimePicker.clear()
+            }
+            else{
+                eventStartEndTimeOptions_Modal.classList.remove('hidden-time-options')
+            }
+        })
 
     </script>
 {% endblock %}

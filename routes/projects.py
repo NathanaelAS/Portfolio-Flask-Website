@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from db import db
-from models import TodoList
+from models import TodoList, ScheduleEventList
+from datetime import datetime, timedelta, time
 
 projects_bp = Blueprint('projects', __name__, url_prefix='/projects')
 
@@ -55,6 +56,58 @@ def update(id):
 @projects_bp.route('/schedulingCalendar', methods = ['POST', 'GET'])
 def schedulingCalendar_page():
     if request.method == 'POST':
-        pass
+        event_data = request.get_json()
+
+        start_time = event_data.get('start_time')
+        end_time = event_data.get('end_time')
+
+        if not start_time and not end_time:
+            is_all_day = True
+            formatted_start_time = None
+            formatted_end_time = None
+        else:
+            is_all_day = False
+
+            if start_time:
+                formatted_start_time = datetime.strptime(start_time, '%I:%M %p').time()
+            else:
+                formatted_start_time = time(0, 0, 0)
+            
+            if end_time:
+                formatted_end_time = datetime.strptime(end_time, '%I:%M %p').time()
+            else:
+                formatted_end_time = time(0, 0, 0)
+        
+        start_date_obj = datetime.strptime(event_data.get('start_date'), '%Y-%m-%d').date()
+        end_date_obj = datetime.strptime(event_data.get('end_date'), '%Y-%m-%d').date()
+
+        start_datetime_obj = datetime.combine(start_date_obj, formatted_start_time)
+        end_datetime_obj = datetime.combine(end_date_obj, formatted_end_time)
+
+        new_event = ScheduleEventList(
+            title = event_data.get('title'),
+            start_date = start_date_obj,
+            end_date = end_date_obj,
+            start_time = formatted_start_time,
+            end_time = formatted_end_time,
+            all_day = event_data.get('all_day'),
+            description = event_data.get('description'),
+            url = event_data.get('url'),
+            color = event_data.get('color')
+        )
+
+        db.session.add(new_event)
+        db.session.commit()
+
+        return jsonify({
+            'id': new_event.id,
+            'title': new_event.title,
+            'start': start_datetime_obj.isoformat(),
+            'end': end_datetime_obj.isoformat() if end_datetime_obj else None,
+            'allDay': is_all_day,
+            'url': new_event.url,
+            'color': new_event.color
+        })
+
     else:
         return render_template('projects/schedulerproject/scheduler.html', active_page = 'schedulingCalendar')
