@@ -76,7 +76,10 @@ def schedulingCalendar_page():
             if end_time:
                 formatted_end_time = datetime.strptime(end_time, '%I:%M %p').time()
             else:
-                formatted_end_time = time(0, 0, 0)
+                if start_time:
+                    formatted_end_time = time(23,59,59)
+                else:
+                    formatted_end_time = time(0, 0, 0)
         
         start_date_obj = datetime.strptime(event_data.get('start_date'), '%Y-%m-%d').date()
         end_date_obj = datetime.strptime(event_data.get('end_date'), '%Y-%m-%d').date()

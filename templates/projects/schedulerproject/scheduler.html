@@ -37,6 +37,10 @@
             padding-top: 1em; /* You can adjust this padding */
             padding-bottom: 1em; /* You can adjust this padding */
         }
+        .is_invalid{
+            border-color: red;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, .25);
+        }
     </style>
 {% endblock %}
 
@@ -54,11 +58,11 @@
                     <h5 class="modal-title">Add Event</h5>
                 </div>
                 <div class="modal-body">
-                    <form id="event-form" method="POST" action="{{ url_for('projects.schedulingCalendar_page') }}">
+                    <form id="event-form" method="POST" action="{{ url_for('projects.schedulingCalendar_page') }}" novalidate>
                         <div class="mb-3">
                             <div class="mb-3">
                                 <label for="event-title" class="form-label">Title</label>
-                                <input type="text" class="form-control" id="event-title">
+                                <input type="text" class="form-control" id="event-title" required>
                             </div>
                             <div class="mb-3">
                                 <label for="event-start-date" class="form-label">Start Date</label>
@@ -103,14 +107,19 @@
                                 <input type="text" class="form-control" id="event-url">
                             </div>
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-modal-btn">Close</button>
+                            <button type="submit" class="btn btn-primary" id="add-event-btn">Add</button>
+                        </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-modal-btn">Close</button>
-                    <button type="submit" class="btn btn-primary" id="add-event-btn" form="event-form">Add</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="popover-content" style="display: none;">
+        <p><strong>Title:</strong><span id="popover-title"></span></p>
+        <p><strong>Description:</strong><span id="popover-description"></span></p>
     </div>
 
 {% endblock %}
@@ -136,11 +145,13 @@
     </script>
     <script>
         let calendar;
+        let currentPopover = null;
 
         selected_start_date = null;
         selected_end_date = null;
 
         document.addEventListener('DOMContentLoaded', function() {
+            // FullCalendar Configuration
             var calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 customButtons: {
@@ -149,11 +160,11 @@
                         click: function() {
                             if(calendar.view.type === 'dayGridMonth'){
                                 if(selected_start_date && selected_end_date){
-                                var myModal = new bootstrap.Modal(document.getElementById('event-modal'));
-                                myModal.show();
+                                    var myModal = new bootstrap.Modal(document.getElementById('event-modal'));
+                                    myModal.show();
 
-                                document.getElementById('event-start-date').value = selected_start_date
-                                document.getElementById('event-end-date').value = selected_end_date
+                                    document.getElementById('event-start-date').value = selected_start_date
+                                    document.getElementById('event-end-date').value = selected_end_date
                                 }
                                 else{
                                     // will need to change this to a custom modal instead of alert
@@ -163,8 +174,6 @@
                             else{
                                 alert('You need to be on the Calendar Month view to be able to add an event')
                             }
-                            
-                            
                         }
                     }
                 },
@@ -181,6 +190,41 @@
                     endDate.setDate(endDate.getDate()-1);
                     selected_start_date = info.startStr;
                     selected_end_date = endDate.toISOString().split('T')[0];
+                },
+                eventClick: function(info){
+
+                    if(currentPopover){
+                        currentPopover.hide()
+                        currentPopover.dispose();
+                        currentPopover = null;
+
+                        if(currentPopoverTarget === info.el){
+                            currentPopoverTarget = null;
+                            return;
+                        }
+                    }
+
+                    const popoverContent = document.getElementById('popover-content').innerHTML;
+
+                    const eventTitle = info.event.title;
+                    const eventDescription = info.event.extendedProps.description;
+
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = popoverContent;
+
+                    tempDiv.querySelector('#popover-title').textContent = eventTitle;
+                    tempDiv.querySelector('#popover-description').textContent = eventDescription;
+
+                    currentPopover = new bootstrap.Popover(info.el, {
+                        container: 'body',
+                        title: 'Event Details',
+                        html: true,
+                        content: tempDiv.innerHTML,
+                        trigger: 'manual',
+                        placement: 'left'
+                    })
+                    currentPopover.show();
+                    currentPopoverTarget = info.el;
                 }
             });
             calendar.render();
@@ -207,6 +251,8 @@
         const eventStartTime_Modal = document.getElementById('event-start-time');
         const eventEndTime_Modal = document.getElementById('event-end-time');
 
+        const requiredInputs = eventForm.querySelectorAll('[required]');
+
         // runs if users click off of the Adding Event Modal instead of using the close button
         eventModalElement.addEventListener('hide.bs.modal', function(){
             eventForm.reset();
@@ -215,6 +261,10 @@
 
             addTimeButton_Modal.style.display = '';
             eventTimeOptions_Modal.classList.remove('show-time-options');
+
+            requiredInputs.forEach(input => {
+                input.classList.remove('is-invalid')
+            })
         });
         // runs if users click on the close button on the Adding Event Modal
         close_Modal_button.addEventListener('click', function(){
@@ -237,64 +287,87 @@
         };
 
         // runs if users click on the Add Event button within the Modal to check and finalize adding user input to the database
-        addEventButton_Modal.addEventListener('click', function(event){
+        // MAIN ADD EVENT BUTTON WITHIN MODAL
+        eventForm.addEventListener('submit', function(event){
             event.preventDefault();
 
-            const eventTitle = eventTitle_Modal.value;
-            const eventStartDate = eventStartDate_Modal.value;
-            const eventEndDate = eventEndDate_Modal.value;
-            const allDay = eventAllDayCheckbox_Modal.checked;
-            const description = description_Modal.value;
-            const url = eventUrl_Modal.value;
-            const color = eventColorPicker_Modal.value;
+            let formIsValid = true;
 
-            const startEndTimes = returnStartEndTimes();
-            const startTime = startEndTimes[0] || null;
-            const endTime = startEndTimes[1] || null;
-
-            const addEventFormData = {
-                title: eventTitle,
-                start_date: eventStartDate,
-                end_date: eventEndDate,
-                start_time: startTime,
-                end_time: endTime,
-                all_day: allDay,
-                description: description,
-                url: url,
-                color: color
-            }
-
-            fetch('/projects/schedulingCalendar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(addEventFormData)
-            })
-            .then(response => {
-                if(!response.ok){
-                    throw new Error('Network response was not ok');
+            requiredInputs.forEach(input => {
+                if(!input.value){
+                    input.classList.add('is-invalid');
+                    formIsValid = false;
+                } else{
+                    input.classList.remove('is-invalid')
                 }
-                return response.json();
-            })
-            .then(newEventData => {
-                calendar.addEvent({
-                    id: newEventData.id,
-                    title: newEventData.title,
-                    start: newEventData.start,
-                    end: newEventData.end,
-                    allDay: newEventData.allDay,
-                    color: newEventData.color,
-                    url: newEventData.url,
-                    description: newEventData.description
-                })
-
-                const modal = bootstrap.Modal.getInstance(eventModalElement);
-                modal.hide();
-            })
-            .catch(error => {
-                console.error('Error:', error)
             });
+
+
+            if(formIsValid){
+
+                const eventTitle = eventTitle_Modal.value;
+                const eventStartDate = eventStartDate_Modal.value;
+                const eventEndDate = eventEndDate_Modal.value;
+                const allDay = eventAllDayCheckbox_Modal.checked;
+                const description = description_Modal.value;
+                const url = eventUrl_Modal.value;
+                const color = eventColorPicker_Modal.value;
+
+                const startEndTimes = returnStartEndTimes();
+                const startTime = startEndTimes[0] || null;
+                const endTime = startEndTimes[1] || null;
+
+                const addEventFormData = {
+                    title: eventTitle,
+                    start_date: eventStartDate,
+                    end_date: eventEndDate,
+                    start_time: startTime,
+                    end_time: endTime,
+                    all_day: allDay,
+                    description: description,
+                    url: url,
+                    color: color
+                }
+
+                fetch('/projects/schedulingCalendar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(addEventFormData)
+                })
+                .then(response => {
+                    if(!response.ok){
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(newEventData => {
+                    calendar.addEvent({
+                        id: newEventData.id,
+                        title: newEventData.title,
+                        start: newEventData.start,
+                        end: newEventData.end,
+                        allDay: newEventData.allDay,
+                        color: newEventData.color,
+                        url: newEventData.url,
+                        description: newEventData.description
+                    })
+
+                    const modal = bootstrap.Modal.getInstance(eventModalElement);
+                    modal.hide();
+                })
+                .catch(error => {
+                    console.error('Error:', error)
+                });
+            }
+        });
+
+        eventForm.addEventListener('keydown', function(event){
+            if(event.key === 'Enter' && event.target.tagName !== 'TEXTAREA'){
+                event.preventDefault();
+                eventForm.requestSubmit();
+            }
         });
 
         addTimeButton_Modal.addEventListener('click', function(event){
@@ -316,7 +389,7 @@
             else{
                 eventStartEndTimeOptions_Modal.classList.remove('hidden-time-options')
             }
-        })
+        });
 
     </script>
 {% endblock %}
