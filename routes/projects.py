@@ -63,8 +63,8 @@ def schedulingCalendar_page():
 
         if not start_time and not end_time:
             is_all_day = True
-            formatted_start_time = None
-            formatted_end_time = None
+            formatted_start_time = time(0, 0, 0)
+            formatted_end_time = time(0, 0, 0)
         else:
             is_all_day = False
 
