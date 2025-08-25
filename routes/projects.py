@@ -65,6 +65,10 @@ def schedulingCalendar_page():
             is_all_day = True
             formatted_start_time = time(0, 0, 0)
             formatted_end_time = time(0, 0, 0)
+        elif start_time and not end_time:
+            is_all_day = False
+            formatted_start_time = datetime.strptime(start_time, '%I:%M %p').time()
+            formatted_end_time = time(23,59,59)
         else:
             is_all_day = False
 
@@ -93,7 +97,7 @@ def schedulingCalendar_page():
             end_date = end_date_obj,
             start_time = formatted_start_time,
             end_time = formatted_end_time,
-            all_day = event_data.get('all_day'),
+            all_day = is_all_day,
             description = event_data.get('description'),
             url = event_data.get('url'),
             color = event_data.get('color')
@@ -102,15 +106,52 @@ def schedulingCalendar_page():
         db.session.add(new_event)
         db.session.commit()
 
-        return jsonify({
-            'id': new_event.id,
-            'title': new_event.title,
-            'start': start_datetime_obj.isoformat(),
-            'end': end_datetime_obj.isoformat() if end_datetime_obj else None,
-            'allDay': is_all_day,
-            'url': new_event.url,
-            'color': new_event.color
-        })
+        return jsonify({'message': 'Event added successfully'}), 201
 
     else:
         return render_template('projects/schedulerproject/scheduler.html', active_page = 'schedulingCalendar')
+    
+@projects_bp.route('/schedulingCalendar/events', methods = ['GET'])
+def get_all_events():
+
+    start_str = request.args.get('start')
+    end_str = request.args.get('end')
+
+    start_date = datetime.fromisoformat(start_str)
+    end_date = datetime.fromisoformat(end_str)
+
+    events = ScheduleEventList.query.filter(
+        (ScheduleEventList.start_date >= start_date) &
+        (ScheduleEventList.end_date <= end_date)
+    ).all()
+
+    events_list = []
+
+    for event in events:
+
+        formatted_start_time = time(0,0,0)
+        formatted_end_time = time(0,0,0)
+
+        if event.start_time:
+            formatted_start_time = event.start_time
+        if event.end_time:
+            formatted_end_time = event.end_time
+
+        start_datetime_obj = datetime.combine(event.start_date, formatted_start_time)
+        end_datetime_obj = datetime.combine(event.end_date, formatted_end_time)
+
+        event_dict = {
+            'id': event.id,
+            'title': event.title,
+            'start': start_datetime_obj.isoformat(),
+            'end': end_datetime_obj.isoformat(),
+            'allDay': bool(event.all_day),
+            'url': event.url,
+            'color': event.color,
+            'extendedProps':{
+                'description': event.description
+            }
+        }
+        events_list.append(event_dict)
+
+    return jsonify(events_list)

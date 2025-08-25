@@ -90,12 +90,12 @@
                                 </div>
                                 <div class="mb-3">
                                     <input class="form-check-input" type="checkbox" id="event-all-day-checkbox">
-                                    <label class="form-check-label" for="event-all-day">All Day</label>
+                                    <label class="form-check-label" for="event-all-day-checkbox">All Day</label>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="event-color" class="form-label">Color</label>
+                                <label for="event-color-picker" class="form-label">Color</label>
                                 <input type="color" class="form-control color-square" id="event-color-picker" value="#007bff">
                             </div>
                             <div class="mb-3">
@@ -118,8 +118,49 @@
     </div>
 
     <div id="popover-content" style="display: none;">
-        <p><strong>Title:</strong><span id="popover-title"></span></p>
-        <p><strong>Description:</strong><span id="popover-description"></span></p>
+        <div class="card bg-light border-0 shadow-sm rounded-3">
+            <div class="card-header bg-primary text-white border-0 py-2">
+                <h6 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Event Details
+                </h6>
+            </div>
+            <div class="card-body py-2">
+                <div class="mb-2">
+                    <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fas fa-tag me-2"></i>Title</small>
+                    <p class="mb-0 text-dark" id="popover-title"></p>
+                </div>
+
+                <div id="popover-all-day-section">
+                    <div class="mb-2">
+                        <small class="text-muted"><i class="fa-duotone fa-solid fa-calendar-day me-2"></i><strong>All Day Event</strong></small>
+                    </div>
+                </div>
+
+                <div id="popover-start-end-section">
+                    <div class="mb-2">
+                        <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fa-duotone fa-solid fa-clock me-2"></i>Start</small>
+                        <p class="mb-0 text-dark" id="popover-start"></p>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fa-duotone fa-solid fa-clock me-2"></i>End</small>
+                        <p class="mb-0 text-dark" id="popover-end"></p>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fas fa-file-alt me-2"></i>Description</small>
+                    <p class="mb-0 text-dark" id="popover-description"></p>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="button" class="btn">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button type="button" class="btn">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
 {% endblock %}
@@ -208,6 +249,9 @@
 
                     const eventTitle = info.event.title;
                     const eventDescription = info.event.extendedProps.description;
+                    const eventStartDate = info.event.start;
+                    const eventEndDate = info.event.end;
+                    const eventAllDay = info.event.allDay;
 
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = popoverContent;
@@ -215,16 +259,35 @@
                     tempDiv.querySelector('#popover-title').textContent = eventTitle;
                     tempDiv.querySelector('#popover-description').textContent = eventDescription;
 
+                    const startEndSection = tempDiv.querySelector('#popover-start-end-section');
+                    const allDaySection = tempDiv.querySelector('#popover-all-day-section')
+
+                    if(eventAllDay){
+                        startEndSection.style.display = 'none';
+                    } else{
+                        allDaySection.style.display = 'none';
+                        tempDiv.querySelector('#popover-start').textContent = eventStartDate.toLocaleString();
+                        if(eventEndDate){
+                            tempDiv.querySelector('#popover-end').textContent = eventEndDate.toLocaleString();
+                        } else{
+                            tempDiv.querySelector('#popover-end').textContent = 'No End Date Selected';
+                        }
+                    }
+                    
+
                     currentPopover = new bootstrap.Popover(info.el, {
                         container: 'body',
-                        title: 'Event Details',
                         html: true,
-                        content: tempDiv.innerHTML,
+                        content: tempDiv,
                         trigger: 'manual',
                         placement: 'left'
                     })
                     currentPopover.show();
                     currentPopoverTarget = info.el;
+                },
+                events: {
+                    url: '/projects/schedulingCalendar/events',
+                    method: 'GET'
                 }
             });
             calendar.render();
@@ -343,19 +406,9 @@
                     return response.json();
                 })
                 .then(newEventData => {
-                    calendar.addEvent({
-                        id: newEventData.id,
-                        title: newEventData.title,
-                        start: newEventData.start,
-                        end: newEventData.end,
-                        allDay: newEventData.allDay,
-                        color: newEventData.color,
-                        url: newEventData.url,
-                        description: newEventData.description
-                    })
-
                     const modal = bootstrap.Modal.getInstance(eventModalElement);
                     modal.hide();
+                    calendar.refetchEvents();
                 })
                 .catch(error => {
                     console.error('Error:', error)
