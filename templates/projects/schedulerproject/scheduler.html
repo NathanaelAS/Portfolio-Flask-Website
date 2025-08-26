@@ -305,8 +305,18 @@
                         html: true,
                         content: tempDiv,
                         trigger: 'manual',
-                        placement: 'left'
-                    })
+                        placement: 'left',
+                        popperConfig: {
+                            modifiers: [
+                                {
+                                    name: 'flip',
+                                    options: {
+                                        fallbackPlacements: ['right', 'top', 'bottom'],
+                                    },
+                                },
+                            ],
+                        },
+                    });
                     currentPopover.show();
                     currentPopoverTarget = info.el;
 
@@ -327,6 +337,10 @@
 
                             editDeletePopoverFooter.classList.add('d-none');
                             saveEditsPopoverFooterButton.classList.remove('d-none');
+
+                            if(currentPopover){
+                                currentPopover.update();
+                            }
 
                             editTitle.value = info.event.title;
                             editDescription.value = info.event.extendedProps.description;
