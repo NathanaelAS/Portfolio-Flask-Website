@@ -155,3 +155,31 @@ def get_all_events():
         events_list.append(event_dict)
 
     return jsonify(events_list)
+
+@projects_bp.route('schedulingCalendar/update-event/<int:event_id>', methods = ['PUT'])
+def update_event(event_id):
+    event = ScheduleEventList.query.get(event_id)
+    if not event:
+        return jsonify({'error': 'Event not found'}), 404
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid data'}), 400
+    
+    event.title = data.get('title', event.title)
+    event.description = data.get('description', event.description)
+
+    db.session.commit()
+
+    return jsonify({'message': 'Event updated successfully'})
+
+@projects_bp.route('schedulingCalendar/delete-event/<int:event_id>', methods = ['DELETE'])
+def delete_event(event_id):
+    event = ScheduleEventList.query.get(event_id)
+    if not event:
+        return jsonify({'error': 'Event not found'}), 404
+    
+    db.session.delete(event)
+    db.session.commit()
+
+    return jsonify({'message': 'Event deleted successfully'})

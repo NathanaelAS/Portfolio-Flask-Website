@@ -128,6 +128,7 @@
                 <div class="mb-2">
                     <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fas fa-tag me-2"></i>Title</small>
                     <p class="mb-0 text-dark" id="popover-title"></p>
+                    <input type="text" class="form-control d-none" id="popover-title-edit">
                 </div>
 
                 <div id="popover-all-day-section">
@@ -140,24 +141,33 @@
                     <div class="mb-2">
                         <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fa-duotone fa-solid fa-clock me-2"></i>Start</small>
                         <p class="mb-0 text-dark" id="popover-start"></p>
+                        <input type="date" class="form-control d-none" id="popover-start-date-edit">
                     </div>
                     <div class="mb-2">
                         <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fa-duotone fa-solid fa-clock me-2"></i>End</small>
                         <p class="mb-0 text-dark" id="popover-end"></p>
+                        <input type="date" class="form-control d-none" id="popover-end-date-edit">
                     </div>
                 </div>
                 
                 <div class="mb-2">
                     <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fas fa-file-alt me-2"></i>Description</small>
                     <p class="mb-0 text-dark" id="popover-description"></p>
+                    <textarea class="form-control d-none" id="popover-description-edit"></textarea>
                 </div>
             </div>
             <div class="card-footer">
-                <button type="button" class="btn">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-                <button type="button" class="btn">
-                    <i class="fa-solid fa-trash-can"></i>
+                <div id="popover-edit-delete-footer">
+                    <button type="button" class="btn" id="popover-edit-pen-button">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button type="button" class="btn" id="popover-delete-button">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+                
+                <button type="button" class="btn d-none" id="popover-edit-save-button">
+                    Save Edits
                 </button>
             </div>
         </div>
@@ -235,17 +245,33 @@
                 eventClick: function(info){
 
                     if(currentPopover){
-                        currentPopover.hide()
-                        currentPopover.dispose();
-                        currentPopover = null;
-
                         if(currentPopoverTarget === info.el){
+                            currentPopover.dispose();
+                            currentPopover = null;
                             currentPopoverTarget = null;
                             return;
+                        } else{
+                            currentPopover.dispose();
+                            currentPopover = null;
+
+                            const oldPopoverEl = document.querySelector('.popover');
+                            if(oldPopoverEl){
+                                oldPopoverEl.remove();
+                            }
                         }
                     }
 
-                    const popoverContent = document.getElementById('popover-content').innerHTML;
+                    const popoverTemplate = document.getElementById('popover-content');
+                    const tempDiv = popoverTemplate.cloneNode(true);
+
+                    tempDiv.style.display = 'block';
+
+                    const uniqueId = '-' + Date.now();
+                    const elementsWithIds = tempDiv.querySelectorAll('[id]');
+
+                    elementsWithIds.forEach(el => {
+                        el.id = el.id + uniqueId;
+                    })
 
                     const eventTitle = info.event.title;
                     const eventDescription = info.event.extendedProps.description;
@@ -253,24 +279,23 @@
                     const eventEndDate = info.event.end;
                     const eventAllDay = info.event.allDay;
 
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = popoverContent;
+                    
 
-                    tempDiv.querySelector('#popover-title').textContent = eventTitle;
-                    tempDiv.querySelector('#popover-description').textContent = eventDescription;
+                    tempDiv.querySelector('#popover-title' + uniqueId).textContent = eventTitle;
+                    tempDiv.querySelector('#popover-description' + uniqueId).textContent = eventDescription;
 
-                    const startEndSection = tempDiv.querySelector('#popover-start-end-section');
-                    const allDaySection = tempDiv.querySelector('#popover-all-day-section')
+                    const startEndSection = tempDiv.querySelector('#popover-start-end-section' + uniqueId);
+                    const allDaySection = tempDiv.querySelector('#popover-all-day-section' + uniqueId)
 
                     if(eventAllDay){
                         startEndSection.style.display = 'none';
                     } else{
                         allDaySection.style.display = 'none';
-                        tempDiv.querySelector('#popover-start').textContent = eventStartDate.toLocaleString();
+                        tempDiv.querySelector('#popover-start' + uniqueId).textContent = eventStartDate.toLocaleString();
                         if(eventEndDate){
-                            tempDiv.querySelector('#popover-end').textContent = eventEndDate.toLocaleString();
+                            tempDiv.querySelector('#popover-end' + uniqueId).textContent = eventEndDate.toLocaleString();
                         } else{
-                            tempDiv.querySelector('#popover-end').textContent = 'No End Date Selected';
+                            tempDiv.querySelector('#popover-end' + uniqueId).textContent = 'No End Date Selected';
                         }
                     }
                     
@@ -284,6 +309,89 @@
                     })
                     currentPopover.show();
                     currentPopoverTarget = info.el;
+
+                    const popoverElement = document.querySelector('.popover');
+                    if(popoverElement){
+                        popoverElement.querySelector('#popover-edit-pen-button'  + uniqueId).addEventListener('click', function(){
+                            const displayTitle = popoverElement.querySelector('#popover-title' + uniqueId);
+                            const editTitle = popoverElement.querySelector('#popover-title-edit' + uniqueId);
+                            const displayDescription = popoverElement.querySelector('#popover-description' + uniqueId);
+                            const editDescription = popoverElement.querySelector('#popover-description-edit' + uniqueId);
+                            const editDeletePopoverFooter = popoverElement.querySelector('#popover-edit-delete-footer' + uniqueId);
+                            const saveEditsPopoverFooterButton = popoverElement.querySelector('#popover-edit-save-button' + uniqueId);
+
+                            displayTitle.classList.add('d-none');
+                            editTitle.classList.remove('d-none');
+                            displayDescription.classList.add('d-none');
+                            editDescription.classList.remove('d-none');
+
+                            editDeletePopoverFooter.classList.add('d-none');
+                            saveEditsPopoverFooterButton.classList.remove('d-none');
+
+                            editTitle.value = info.event.title;
+                            editDescription.value = info.event.extendedProps.description;
+
+                            saveEditsPopoverFooterButton.addEventListener('click', function(){
+                                updatedTitle = editTitle.value;
+                                updatedDescription = editDescription.value;
+                                editedEventID = info.event.id;
+
+                                if(confirm("Are you sure you would like to update this event?")){
+                                    fetch(`/projects/schedulingCalendar/update-event/${editedEventID}`, {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({
+                                            title: updatedTitle,
+                                            description: updatedDescription
+                                        })
+                                    })
+                                    .then(response => {
+                                        if(!response.ok){
+                                            throw new Error('Network response was not ok');
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        currentPopover.dispose();
+                                        currentPopover = null;
+                                        calendar.refetchEvents();
+                                    })
+                                    .catch(error => {
+                                        console.error('Error', error);
+                                    })
+                                }
+                                
+                            })
+                        })
+
+                        popoverElement.querySelector('#popover-delete-button' + uniqueId).addEventListener('click', function(){
+                            if(confirm("Are you sure you want to delete this event?")){
+                                const eventId = info.event.id;
+
+                                fetch(`/projects/schedulingCalendar/delete-event/${eventId}`, {
+                                    method: 'DELETE',
+                                })
+                                .then(response => {
+                                    if(!response.ok){
+                                        throw new Error('Failed to delete event');
+                                    }
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    currentPopover.dispose();
+                                    currentPopover = null;
+
+                                    info.event.remove();
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert("An error occurred while deleting the event.");
+                                })
+                            }
+                        })
+                    }
                 },
                 events: {
                     url: '/projects/schedulingCalendar/events',
