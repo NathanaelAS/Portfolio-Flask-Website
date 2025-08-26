@@ -17,7 +17,7 @@
 	<section class="bg-dark text-white py-5 text-center">
 	  <div class="container">
 		<h1 class="display-4 fw-bold introTyping" id="introTyping">Hi, I'm Nathanael Spear</h1>
-		<p class="lead mt-3">Backend-focused software developer building tools with Python, Flask, and Google Apps Script.</p>
+		<p class="lead mt-3">Backend-focused software developer building tools with Python, Flask, and JavaScript.</p>
 		<a href="{{ url_for('projects.projectOverview_page') }}" class="btn btn-primary btn-lg mt-4">View My Projects</a>
 	  </div>
 	</section>
@@ -37,17 +37,20 @@
 		  <div class="col-md-4 mb-4">
 			<div class="card h-100 shadow-sm">
 			  <div class="card-body">
-				<h5 class="card-title">Task Manager</h5>
+				<h5 class="card-title">Task Manager<i class="fa-solid fa-clipboard-list ms-2"></i></h5>
 				<p class="card-text">This task manager app, built with Flask and SQLAlchemy, allows users to create, view, delete, and update to-do list items with an automatic timestamp for each entry.</p>
-				<span class="badge bg-secondary me-1 badge-lg">	
+				<span class="badge bg-secondary me-1 badge-lg mb-1">	
 					<i class="devicon-python-plain"></i>
 					Python
 				</span>
-				<span class="badge bg-secondary me-1 badge-lg">
+				<span class="badge bg-secondary me-1 badge-lg mb-1">
 					<i class="devicon-flask-original"></i>
 					Flask
 				</span>
-				<span class="badge bg-secondary me-1 badge-lg" >SQLAlchemy</span>
+				<span class="badge bg-secondary me-1 badge-lg mb-1" >
+					<i class="devicon-sqlalchemy-plain"></i>
+					SQLAlchemy
+				</span>
 			  </div>
 			  <div class="card-footer bg-white border-0">
 				<a href="{{ url_for('projects.taskManager_page') }}" class="btn btn-outline-primary w-100">View Project</a>
@@ -59,17 +62,21 @@
 		  <div class="col-md-4 mb-4">
 			<div class="card h-100 shadow-sm">
 			  <div class="card-body">
-				<h5 class="card-title">Scheduling Calendar</h5>
-				<p class="card-text">Testing</p>
-				<span class="badge bg-secondary me-1 badge-lg">	
+				<h5 class="card-title">Scheduling Calendar<i class="fa-solid fa-calendar-days ms-2"></i></h5>
+				<p class="card-text">This is a full-stack web application designed for creating, viewing, and managing events. The application provides a user-friendly interface for interacting with a calendar, powered by a backend that handles all event data.</p>
+				<span class="badge bg-secondary me-1 badge-lg mb-1">	
 					<i class="devicon-python-plain"></i>
 					Python
 				</span>
-				<span class="badge bg-secondary badge-lg">
-					<i class="devicon-pandas-plain"></i>
-					Pandas
+				<span class="badge bg-secondary badge-lg mb-1">
+					<i class="devicon-flask-original"></i>
+					Flask
 				</span>
-				<span class="badge bg-secondary me-1 badge-lg" >PDFPlumber</span>
+				<span class="badge bg-secondary me-1 badge-lg mb-1" >REST API</span>
+				<span class="badge bg-secondary me-1 badge-lg mb-1" >
+					<i class="devicon-sqlalchemy-plain"></i>
+					SQLAlchemy
+				</span>
 			  </div>
 			  <div class="card-footer bg-white border-0">
 				<a href="{{ url_for('projects.schedulingCalendar_page') }}" class="btn btn-outline-primary w-100">View Project</a>

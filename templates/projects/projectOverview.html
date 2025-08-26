@@ -19,16 +19,20 @@
 			<div class="card h-100 shadow-sm">
 			  <div class="card-body">
 				<h5 class="card-title">
-					<i class="devicon-python-plain colored me-1"></i> Task Manager
+					<i class="devicon-python-plain colored me-1"></i> Task Manager<i class="fa-solid fa-clipboard-list ms-2"></i>
 				</h5>
-				<p class="card-text">Testing</p>
-				<span class="badge bg-secondary me-1 badge-lg">	
+				<p class="card-text">This task manager app, built with Flask and SQLAlchemy, allows users to create, view, delete, and update to-do list items with an automatic timestamp for each entry.</p>
+				<span class="badge bg-secondary me-1 badge-lg mb-1">	
 					<i class="devicon-python-plain"></i>
 					Python
 				</span>
-				<span class="badge bg-secondary me-1 badge-lg">
+				<span class="badge bg-secondary me-1 badge-lg mb-1">
 					<i class="devicon-flask-original"></i>
 					Flask
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg mb-1" >
+					<i class="devicon-sqlalchemy-plain"></i>
+					SQLAlchemy
 				</span>
 			  </div>
 			  <div class="card-footer bg-white border-0">
@@ -43,17 +47,21 @@
 			  <div class="card-body">
 				<h5 class="card-title">
 					<i class="devicon-python-plain colored me-1"></i>
-					Scheduling Calendar
+					Scheduling Calendar<i class="fa-solid fa-calendar-days ms-2"></i>
 				</h5>
-				<p class="card-text">Testing</p>
-				<span class="badge bg-secondary me-1 badge-lg">	
+				<p class="card-text">This is a full-stack web application designed for creating, viewing, and managing events. The application provides a user-friendly interface for interacting with a calendar, powered by a backend that handles all event data.</p>
+				<span class="badge bg-secondary me-1 badge-lg mb-1">	
 					<i class="devicon-python-plain"></i>
 					Python
 				</span>
-				<span class="badge bg-secondary badge-lg">
+				<span class="badge bg-secondary badge-lg me-1 mb-1">
 					Flask
 				</span>
-				<span class="badge bg-secondary me-1 badge-lg" >FullCalendar</span>
+				<span class="badge bg-secondary me-1 badge-lg mb-1" >REST API</span>
+				<span class="badge bg-secondary me-1 badge-lg mb-1" >
+					<i class="devicon-sqlalchemy-plain"></i>
+					SQLAlchemy
+				</span>
 			  </div>
 			  <div class="card-footer bg-white border-0">
 				<a href="{{ url_for('projects.schedulingCalendar_page') }}" class="btn btn-outline-primary w-100">View Project</a>
@@ -93,28 +101,6 @@
 		<span class="badge bg-secondary badge-lg">
 		  <i class="devicon-javascript-plain colored me-1"></i> JavaScript
 		</span>
-		<span class="badge bg-secondary badge-lg"
-			data-bs-toggle="tooltip"
-			data-bs-placement="top"
-			title="PDFPlumber: Extract tables and text from PDFs with precision.">
-			PDFPlumber
-		</span>
-		<span class="badge bg-secondary badge-lg">Google Apps Script</span>
-		<span class="badge bg-secondary badge-lg">
-		  <i class="devicon-nodejs-plain colored me-1"></i> Node.js
-		</span>
-		<span class="badge bg-secondary badge-lg">
-		  <i class="devicon-mongodb-plain-wordmark colored me-1"></i> MongoDB
-		</span>
-		<span class="badge bg-secondary badge-lg">
-		  <i class="devicon-java-plain-wordmark colored me-1"></i> Java
-		</span>
-		<span class="badge bg-secondary badge-lg">
-		  <i class="devicon-spring-plain-wordmark colored me-1"></i> Spring Boot
-		</span>
-		<span class="badge bg-secondary badge-lg">
-		  <i class="devicon-pandas-plain"></i> Pandas
-		</span>
 	  </div>
 	</div>
 {% endblock %}
@@ -128,10 +114,7 @@
 
 {% block scripts %}
 	<script>
-		document.addEventListener('DOMContentLoaded', () => {
-		  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-		  tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
-		});
+		
 	</script>
 {% endblock %}
 

@@ -71,6 +71,11 @@
 			transform: translateY(-50%) translateX(0); /* Slide the arrow to its final position */
 			opacity: 1; /* Make the arrow visible */
 		}
+		.disabled-link {
+			pointer-events: none; /* Prevents clicks */
+			cursor: default;     /* Changes the cursor */
+			opacity: 0.65;       /* Makes it look disabled */
+		}
 	</style>
 {% endblock %}
 
@@ -81,76 +86,31 @@
 	
 	<div class="container">
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-12">
 				<!-- Centered Contact Card -->
 				<div class="d-flex justify-content-center mt-5">
 					<div class="card text-center shadow-lg" style="width: 18rem;">
-						<img src="{{ url_for('static', filename='images/profileplaceholder.jpg') }}"
-							class="card-img-top rounded-circle mx-auto mt-4"
-							alt="Profile Picture"
-							style="width: 150px; height: 150px; object-fit: cover;">
+						<i class="fa-solid fa-user text-secondary mx-auto mt-4 mb-4"
+                			style="font-size: 150px; width: 150px; height: 150px; line-height: 150px;">
+						</i>
 						<div class="card-body">
-						<h5 class="card-title">Nathanael Spear</h5>
-						<p class="card-text">Check out my Profile on LinkedIn!</p>
-						<a href="https://www.linkedin.com/in/nathanael-spear-577b85218" target="_blank" class="btn btn-outline-secondary">LinkedIn</a>
+							<h5 class="card-title mb-3">Nathanael Spear</h5>
+							<a href="#" class="btn btn-primary disabled-link mb-3" aria-disabled="true">Download My Resume</a>
+							<div style="display: flex; gap: 10px; justify-content: center;">
+								<a href="https://www.linkedin.com/in/nathanael-spear-577b85218" target="_blank" class="btn btn-outline-primary"><i class="fa-brands fa-linkedin me-2"></i>LinkedIn</a>
+								<a href="https://github.com/NathanaelAS" target="_blank" class="btn btn-outline-dark"><i class="fa-brands fa-github me-2"></i>Github</a>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			<div class="col-md-6">
-				<div class="mx-auto" style="max-width: 400px;">
-					<h3 class="text-center mt-5 mb-4">Email</h3>
-					<form class="needs-validation" id="emailForm" novalidate>
-						<input type="text" class="form-control" id="name" placeholder="Name:" name="name" required>
-						<input type="email" class="form-control" id="email" placeholder="Email:" name="email" required>
-						<textarea class="form-control mb-3" rows="4" id="message" placeholder="Message:" name="text" required></textarea>
-						<div class="text-end">
-							<button type="submit" class="btn btn-outline-success my-custom-fill-button" id="emailSubmitBtn">Send Email</button>
-						</div>
-					</form>
-				</div>
-			</div>
-
 		</div>
 	</div>
 {% endblock %}
 
 {% block scripts %}
 	<script>
-		const myForm = document.getElementById('emailForm');
-
-		let formSubmittedOnce = false
 		
-		myForm.addEventListener('submit', function(event) {
-			if (!myForm.checkValidity()) {
-				event.preventDefault();
-				event.stopPropagation();	
-			} else {
-				alert('Form Submitted Successfully!');
-				myForm.reset();
-			}
-
-			myForm.classList.add('was-validated')
-			formSubmittedOnce = true;
-			if (myForm.checkValidity() && event.type === 'submit') {
-				myForm.classList.remove('was-validated')
-				formSubmittedOnce = false;
-			}
-		})
-
-		document.querySelectorAll('input[required], textarea[required]').forEach(element => {
-			element.addEventListener('blur', function() {
-				if (formSubmittedOnce) {
-					myForm.classList.add('was-validated')
-				}
-			})
-			element.addEventListener('input', function() {
-				if (formSubmittedOnce) {
-					myForm.classList.add('was-validated')
-				}
-			})
-		})
 	</script>
 {% endblock %}
 	
