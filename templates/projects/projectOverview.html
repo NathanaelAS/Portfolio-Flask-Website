@@ -2,6 +2,17 @@
 
 {% block title %}Projects Overview{% endblock %}
 
+{% block styles %}
+	<style>
+		.custom-badge-size {
+			min-height: 2.5rem; /* Or any other desired height */
+			min-width: 80px; /* Adjust as needed */
+			text-align: center;
+			justify-content: center;
+		}
+	</style>
+{% endblock %}
+
 {% block content %}
 	<div class='py-3 bg-light text-center'>
 		<h1 class='mt-3'>Projects Overview</h1>
@@ -91,15 +102,35 @@
 
 	<div class="container text-center">
 	  <h5 class="mb-4">Tech Stack Legend</h5>
-	  <div class="d-flex flex-wrap justify-content-center gap-3">
-		<span class="badge bg-secondary badge-lg">
+	  <div class="d-flex flex-wrap justify-content-center gap-3 align-items-stretch">
+		<span class="badge bg-secondary badge-lg d-flex align-items-center custom-badge-size">
 		  <i class="devicon-python-plain colored me-1"></i> Python
 		</span>
-		<span class="badge bg-secondary badge-lg">
+		<span class="badge bg-secondary badge-lg d-flex align-items-center custom-badge-size">
 		  <i class="devicon-flask-original-wordmark me-1"></i> Flask
 		</span>
-		<span class="badge bg-secondary badge-lg">
+		<span class="badge bg-secondary badge-lg d-flex align-items-center custom-badge-size">
 		  <i class="devicon-javascript-plain colored me-1"></i> JavaScript
+		</span>
+		<span class="badge bg-secondary badge-lg d-flex align-items-center custom-badge-size"
+			title="SQLAlchemy"
+			data-bs-toggle="popover"
+			data-bs-trigger="hover"
+			data-bs-placement="top"
+			data-bs-html="true"
+			data-bs-content="SQLAlchemy is the Python SQL toolkit and Object Relational Mapper that gives application developers the full power and flexibility of SQL.<br><br>
+			It provides a full suite of well known enterprise-level persistence patterns, designed for efficient and high-performing database access, adapted into a simple and Pythonic domain language.">
+		  <i class="devicon-sqlalchemy-plain me-1"></i> SQLAlchemy
+		</span>
+		<span class="badge bg-secondary me-1 badge-lg d-flex align-items-center custom-badge-size"
+			title="REST API"
+			data-bs-toggle="popover"
+			data-bs-trigger="hover"
+			data-bs-placement="top"
+			data-bs-html="true"
+			data-bs-content="A REST API is a set of rules for how web applications communicate with each other.<br><br>
+			It's a fundamental part of modern web development because it provides a consistent and flexible way for different systems to interact.">
+			REST API
 		</span>
 	  </div>
 	</div>
@@ -114,7 +145,10 @@
 
 {% block scripts %}
 	<script>
-		
+		var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+		var popoverList = popoverTriggerList.map(function(popoverTriggerEl){
+			return new bootstrap.Popover(popoverTriggerEl)
+		})
 	</script>
 {% endblock %}
 
