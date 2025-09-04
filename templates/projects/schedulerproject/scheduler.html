@@ -41,6 +41,42 @@
             border-color: red;
             box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, .25);
         }
+        .fc-event:hover {
+            filter: brightness(85%); 
+            cursor: pointer;        
+        }
+        .fc-eventViewerButton-button {
+            background-color: grey; /* Grey background */
+            color: #fff;              /* White text */
+            border-color: grey;
+        }
+        .fc-eventViewerButton-button:hover {
+            background-color: rgb(65, 65, 65);
+            border-color: black;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .fc-addEventButton-button {
+            background-color: lightblue;
+            color: black;
+            border-color: lightblue;
+        }
+        .fc-addEventButton-button:hover {
+            background-color: aquamarine;
+            color: black;
+            border-color: black;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .fc-toolbar-chunk {
+            display: flex; /* Ensures items inside are also flex items */
+            flex: 1;      /* This is the key: makes each section take up equal space */
+        }
+        .fc-toolbar-chunk:nth-child(2) {
+            justify-content: center; /* Centers the title within its equally-sized chunk */
+        }
+
+        .fc-toolbar-chunk:nth-child(3) {
+            justify-content: flex-end; /* Pushes the right buttons to the end of the chunk */
+        }
     </style>
 {% endblock %}
 
@@ -202,6 +238,8 @@
         selected_start_date = null;
         selected_end_date = null;
 
+        const eventListUrl = "{{ url_for('projects.eventViewer_Page') }}";
+
         document.addEventListener('DOMContentLoaded', function() {
             // FullCalendar Configuration
             var calendarEl = document.getElementById('calendar');
@@ -227,12 +265,18 @@
                                 alert('You need to be on the Calendar Month view to be able to add an event')
                             }
                         }
+                    },
+                    eventViewerButton: {
+                        text: 'View Event List',
+                        click: function() {
+                            window.location.href = eventListUrl;
+                        }
                     }
                 },
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay addEventButton'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay addEventButton eventViewerButton'
                 },
                 initialView: 'dayGridMonth',
                 themeSystem: 'bootstrap5',

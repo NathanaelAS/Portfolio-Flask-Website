@@ -111,6 +111,11 @@ def schedulingCalendar_page():
     else:
         return render_template('projects/schedulerproject/scheduler.html', active_page = 'schedulingCalendar')
     
+@projects_bp.route('/schedulingCalendar/eventViewer', methods = ['GET'])
+def eventViewer_Page():
+    events = ScheduleEventList.query.all()
+    return render_template('projects/schedulerproject/eventViewer.html', active_page = 'schedulingCalendar', events = events)
+    
 @projects_bp.route('/schedulingCalendar/events', methods = ['GET'])
 def get_all_events():
 
