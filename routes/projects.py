@@ -142,8 +142,15 @@ def get_all_events():
         if event.end_time:
             formatted_end_time = event.end_time
 
-        start_datetime_obj = datetime.combine(event.start_date, formatted_start_time)
-        end_datetime_obj = datetime.combine(event.end_date, formatted_end_time)
+        if event.all_day:
+            start_datetime_obj = datetime.combine(event.start_date, formatted_start_time)
+            end_date_exclusive_for_calendar = event.end_date + timedelta(days=1)
+            end_datetime_obj = datetime.combine(end_date_exclusive_for_calendar, formatted_end_time)
+        else:
+            start_datetime_obj = datetime.combine(event.start_date, formatted_start_time)
+            end_datetime_obj = datetime.combine(event.end_date, formatted_end_time)
+
+        
 
         event_dict = {
             'id': event.id,
@@ -174,6 +181,19 @@ def update_event(event_id):
     event.title = data.get('title', event.title)
     event.description = data.get('description', event.description)
 
+    if data.get('start_date'):
+        pythonStartDate = datetime.strptime((data.get('start_date')), '%Y-%m-%d').date()
+    else:
+        pythonStartDate = event.start_date
+
+    if data.get('end_date'):
+        pythonEndDate = datetime.strptime((data.get('end_date')), '%Y-%m-%d').date()
+    else:
+        pythonEndDate = event.end_date
+    
+    event.start_date = pythonStartDate
+    event.end_date = pythonEndDate
+
     db.session.commit()
 
     return jsonify({'message': 'Event updated successfully'})
@@ -188,3 +208,60 @@ def delete_event(event_id):
     db.session.commit()
 
     return jsonify({'message': 'Event deleted successfully'})
+
+@projects_bp.route('schedulingCalendar/calendar-drag-event/<int:event_id>', methods = ['POST'])
+def calendar_drag_event(event_id):
+    event = ScheduleEventList.query.get(event_id)
+    if not event:
+        return jsonify({'error': 'Event not found'}), 404
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    if event.all_day:
+        durationInHours = data.get('event_duration_hours')
+        pythonStartDate = datetime.strptime((data.get('start_date')), '%Y-%m-%dT%H:%M:%S.%fZ').date()
+        if durationInHours > 24:
+            duration = timedelta(hours=durationInHours)
+            pythonEndDate = pythonStartDate + duration - timedelta(days=1)
+
+            event.start_date = pythonStartDate
+            event.end_date = pythonEndDate
+        else:
+            event.start_date = pythonStartDate
+            event.end_date = pythonStartDate
+    else:
+        pythonStartDate = datetime.strptime((data.get('start_date')), '%Y-%m-%dT%H:%M:%S.%fZ')
+        pythonEndDate = datetime.strptime((data.get('end_date')), '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        event.start_date = pythonStartDate.date()
+        event.start_time = pythonStartDate.time()
+        event.end_date = pythonEndDate.date()
+        event.end_time = pythonEndDate.time()
+
+    db.session.commit()
+
+    return jsonify({'message': 'Event updated successfully'})
+
+@projects_bp.route('schedulingCalendar/calendar-resize-event/<int:event_id>', methods = ['POST'])
+def calendar_resize_event(event_id):
+    event = ScheduleEventList.query.get(event_id)
+
+    if not event:
+        return jsonify({'error': 'Event not found'}), 404
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Invalid data'}), 400
+    
+    pythonStartDate = datetime.strptime((data.get('start_date')), '%Y-%m-%dT%H:%M:%S.%fZ').date()
+    pythonEndDate = datetime.strptime((data.get('end_date')), '%Y-%m-%dT%H:%M:%S.%fZ').date()
+
+    event.start_date = pythonStartDate
+    event.end_date = pythonEndDate - timedelta(days=1)
+
+    db.session.commit()
+
+    return jsonify({'message': 'Event updated successfully'})
+

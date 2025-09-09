@@ -372,6 +372,11 @@
                             const editTitle = popoverElement.querySelector('#popover-title-edit' + uniqueId);
                             const displayDescription = popoverElement.querySelector('#popover-description' + uniqueId);
                             const editDescription = popoverElement.querySelector('#popover-description-edit' + uniqueId);
+                            const displayStartDate = popoverElement.querySelector('#popover-start' + uniqueId);
+                            const editStartDate = popoverElement.querySelector('#popover-start-date-edit' + uniqueId);
+                            const displayEndDate = popoverElement.querySelector('#popover-end' + uniqueId);
+                            const editEndDate = popoverElement.querySelector('#popover-end-date-edit' + uniqueId);
+
                             const editDeletePopoverFooter = popoverElement.querySelector('#popover-edit-delete-footer' + uniqueId);
                             const saveEditsPopoverFooterButton = popoverElement.querySelector('#popover-edit-save-button' + uniqueId);
 
@@ -379,6 +384,11 @@
                             editTitle.classList.remove('d-none');
                             displayDescription.classList.add('d-none');
                             editDescription.classList.remove('d-none');
+                            displayStartDate.classList.add('d-none');
+                            editStartDate.classList.remove('d-none');
+                            displayEndDate.classList.add('d-none');
+                            editEndDate.classList.remove('d-none');
+
 
                             editDeletePopoverFooter.classList.add('d-none');
                             saveEditsPopoverFooterButton.classList.remove('d-none');
@@ -389,10 +399,28 @@
 
                             editTitle.value = info.event.title;
                             editDescription.value = info.event.extendedProps.description;
+                            
+                            const startDate = info.event.start;
+                            const endDate = info.event.end;
+
+                            const startYear = startDate.getFullYear();
+                            const startMonth = (startDate.getMonth() + 1).toString().padStart(2, '0');
+                            const startDay = startDate.getDate().toString().padStart(2, '0');
+                            const formattedStartDate = `${startYear}-${startMonth}-${startDay}`;
+
+                            const endYear = endDate.getFullYear();
+                            const endMonth = (endDate.getMonth() + 1).toString().padStart(2, '0');
+                            const endDay = endDate.getDate().toString().padStart(2, '0');
+                            const formattedEndDate = `${endYear}-${endMonth}-${endDay}`;
+
+                            editStartDate.value = formattedStartDate;
+                            editEndDate.value = formattedEndDate;
 
                             saveEditsPopoverFooterButton.addEventListener('click', function(){
                                 updatedTitle = editTitle.value;
                                 updatedDescription = editDescription.value;
+                                updatedStartDate = editStartDate.value;
+                                updatedEndDate = editEndDate.value;
                                 editedEventID = info.event.id;
 
                                 if(confirm("Are you sure you would like to update this event?")){
@@ -403,7 +431,9 @@
                                         },
                                         body: JSON.stringify({
                                             title: updatedTitle,
-                                            description: updatedDescription
+                                            description: updatedDescription,
+                                            start_date: updatedStartDate,
+                                            end_date: updatedEndDate
                                         })
                                     })
                                     .then(response => {
@@ -455,6 +485,68 @@
                 events: {
                     url: '/projects/schedulingCalendar/events',
                     method: 'GET'
+                },
+                editable: true,
+                eventDrop: function(info) {
+                    const eventId = info.event.id;
+                    const eventStart = info.event.start;
+                    const eventEnd = info.event.end;
+                    const eventDurationHours = 24
+
+                    if (eventEnd){
+                        const durationInMs = info.event.end.getTime() - info.event.start.getTime();
+                        eventDurationHours = durationInMs / (1000 * 60 * 60);
+                    }      
+
+                    fetch(`/projects/schedulingCalendar/calendar-drag-event/${eventId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            start_date: eventStart,
+                            end_date: eventEnd,
+                            event_duration_hours: eventDurationHours
+                        })
+                    })
+                    .then(response => {
+                        if (!response){
+                            throw new Error('Failed to edit event from dragging on calendar');
+                            info.revert();
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        info.revert();
+                    })
+                },
+                eventResize: function(info) {
+                    const eventId = info.event.id;
+                    const newEventStart = info.event.start;
+                    const newEventEnd = info.event.end;
+
+                    fetch(`/projects/schedulingCalendar/calendar-resize-event/${eventId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            start_date: newEventStart,
+                            end_date: newEventEnd,
+                        })
+                    })
+                    .then(response => {
+                        if (!response){
+                            throw new Error('Failed to edit event from resizing on calendar');
+                            info.revert();
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        info.revert();
+                    })
                 }
             });
             calendar.render();
