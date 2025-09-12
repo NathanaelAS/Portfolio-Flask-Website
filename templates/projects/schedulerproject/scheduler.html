@@ -191,6 +191,11 @@
                     <p class="mb-0 text-dark" id="popover-description"></p>
                     <textarea class="form-control d-none" id="popover-description-edit"></textarea>
                 </div>
+                <div class="mb-2">
+                    <small class="text-muted border-bottom border-secondary d-inline-block pb-1" style="width: 100%;"><i class="fas fa-file-alt me-2"></i>Color</small>
+                    <input type="color" class="form-control color-square" id="popover-color-picker" disabled>
+                </div>
+
             </div>
             <div class="card-footer">
                 <div id="popover-edit-delete-footer" class="d-flex justify-content-center">
@@ -306,6 +311,9 @@
                         }
                     }
 
+                    // for testing only
+                    console.log(info.event)
+
                     const popoverTemplate = document.getElementById('popover-content');
                     const tempDiv = popoverTemplate.cloneNode(true);
 
@@ -323,11 +331,13 @@
                     const eventStartDate = info.event.start;
                     const eventEndDate = info.event.end;
                     const eventAllDay = info.event.allDay;
+                    const eventColor = info.event.backgroundColor;
 
                     
 
                     tempDiv.querySelector('#popover-title' + uniqueId).textContent = eventTitle;
                     tempDiv.querySelector('#popover-description' + uniqueId).textContent = eventDescription;
+                    tempDiv.querySelector('#popover-color-picker' + uniqueId).value = eventColor;
 
                     const startEndSection = tempDiv.querySelector('#popover-start-end-section' + uniqueId);
                     const allDaySection = tempDiv.querySelector('#popover-all-day-section' + uniqueId)
@@ -343,7 +353,7 @@
                             tempDiv.querySelector('#popover-end' + uniqueId).textContent = 'No End Date Selected';
                         }
                     }
-                    
+
 
                     currentPopover = new bootstrap.Popover(info.el, {
                         container: 'body',
@@ -377,6 +387,8 @@
                             const displayEndDate = popoverElement.querySelector('#popover-end' + uniqueId);
                             const editEndDate = popoverElement.querySelector('#popover-end-date-edit' + uniqueId);
 
+                            const editColorPicker = popoverElement.querySelector('#popover-color-picker' + uniqueId);
+
                             const editDeletePopoverFooter = popoverElement.querySelector('#popover-edit-delete-footer' + uniqueId);
                             const saveEditsPopoverFooterButton = popoverElement.querySelector('#popover-edit-save-button' + uniqueId);
 
@@ -388,6 +400,8 @@
                             editStartDate.classList.remove('d-none');
                             displayEndDate.classList.add('d-none');
                             editEndDate.classList.remove('d-none');
+                            editColorPicker.disabled = false;
+                            
 
 
                             editDeletePopoverFooter.classList.add('d-none');
@@ -421,6 +435,7 @@
                                 updatedDescription = editDescription.value;
                                 updatedStartDate = editStartDate.value;
                                 updatedEndDate = editEndDate.value;
+                                updatedColor = editColorPicker.value;
                                 editedEventID = info.event.id;
 
                                 if(confirm("Are you sure you would like to update this event?")){
@@ -433,7 +448,8 @@
                                             title: updatedTitle,
                                             description: updatedDescription,
                                             start_date: updatedStartDate,
-                                            end_date: updatedEndDate
+                                            end_date: updatedEndDate,
+                                            color: updatedColor
                                         })
                                     })
                                     .then(response => {

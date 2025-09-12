@@ -88,8 +88,6 @@ def schedulingCalendar_page():
         start_date_obj = datetime.strptime(event_data.get('start_date'), '%Y-%m-%d').date()
         end_date_obj = datetime.strptime(event_data.get('end_date'), '%Y-%m-%d').date()
 
-        start_datetime_obj = datetime.combine(start_date_obj, formatted_start_time)
-        end_datetime_obj = datetime.combine(end_date_obj, formatted_end_time)
 
         new_event = ScheduleEventList(
             title = event_data.get('title'),
@@ -180,6 +178,7 @@ def update_event(event_id):
     
     event.title = data.get('title', event.title)
     event.description = data.get('description', event.description)
+    event.color = data.get('color', event.color)
 
     if data.get('start_date'):
         pythonStartDate = datetime.strptime((data.get('start_date')), '%Y-%m-%d').date()
@@ -187,7 +186,10 @@ def update_event(event_id):
         pythonStartDate = event.start_date
 
     if data.get('end_date'):
-        pythonEndDate = datetime.strptime((data.get('end_date')), '%Y-%m-%d').date()
+        if event.all_day:
+            pythonEndDate = datetime.strptime((data.get('end_date')), '%Y-%m-%d').date() - timedelta(days=1)
+        else:
+            pythonEndDate = datetime.strptime((data.get('end_date')), '%Y-%m-%d').date()
     else:
         pythonEndDate = event.end_date
     
