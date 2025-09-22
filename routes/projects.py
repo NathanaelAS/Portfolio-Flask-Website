@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from db import db
-from models import TodoList, ScheduleEventList
+from models import TodoList, ScheduleEventList, BlogUser, BlogPost
 from datetime import datetime, timedelta, time
 
 projects_bp = Blueprint('projects', __name__, url_prefix='/projects')
@@ -267,3 +267,7 @@ def calendar_resize_event(event_id):
 
     return jsonify({'message': 'Event updated successfully'})
 
+
+@projects_bp.route('/blog', methods = ['GET', 'POST'])
+def blog_page():
+    return render_template('projects/blogProject/blogHome.html', active_page = 'blog')
