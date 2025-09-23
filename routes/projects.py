@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from db import db
 from models import TodoList, ScheduleEventList, BlogUser, BlogPost
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, timezone
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 projects_bp = Blueprint('projects', __name__, url_prefix='/projects')
 
@@ -166,7 +168,7 @@ def get_all_events():
 
     return jsonify(events_list)
 
-@projects_bp.route('schedulingCalendar/update-event/<int:event_id>', methods = ['PUT'])
+@projects_bp.route('/schedulingCalendar/update-event/<int:event_id>', methods = ['PUT'])
 def update_event(event_id):
     event = ScheduleEventList.query.get(event_id)
     if not event:
@@ -200,7 +202,7 @@ def update_event(event_id):
 
     return jsonify({'message': 'Event updated successfully'})
 
-@projects_bp.route('schedulingCalendar/delete-event/<int:event_id>', methods = ['DELETE'])
+@projects_bp.route('/schedulingCalendar/delete-event/<int:event_id>', methods = ['DELETE'])
 def delete_event(event_id):
     event = ScheduleEventList.query.get(event_id)
     if not event:
@@ -211,7 +213,7 @@ def delete_event(event_id):
 
     return jsonify({'message': 'Event deleted successfully'})
 
-@projects_bp.route('schedulingCalendar/calendar-drag-event/<int:event_id>', methods = ['POST'])
+@projects_bp.route('/schedulingCalendar/calendar-drag-event/<int:event_id>', methods = ['POST'])
 def calendar_drag_event(event_id):
     event = ScheduleEventList.query.get(event_id)
     if not event:
@@ -246,7 +248,7 @@ def calendar_drag_event(event_id):
 
     return jsonify({'message': 'Event updated successfully'})
 
-@projects_bp.route('schedulingCalendar/calendar-resize-event/<int:event_id>', methods = ['POST'])
+@projects_bp.route('/schedulingCalendar/calendar-resize-event/<int:event_id>', methods = ['POST'])
 def calendar_resize_event(event_id):
     event = ScheduleEventList.query.get(event_id)
 
@@ -267,7 +269,171 @@ def calendar_resize_event(event_id):
 
     return jsonify({'message': 'Event updated successfully'})
 
-
 @projects_bp.route('/blog', methods = ['GET', 'POST'])
 def blog_page():
     return render_template('projects/blogProject/blogHome.html', active_page = 'blog')
+
+@projects_bp.route('/blog/login', methods = ['GET','POST'])
+def blog_login_page():
+    if request.method == 'POST':
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        username = data.get('username')
+        plainTextPassword = data.get('password')
+
+        if not username or not plainTextPassword:
+            return jsonify({'error': 'All fields are required'}), 400
+        
+        user = BlogUser.query.filter_by(username = username).first()
+
+        if user:
+            # If the user exists, compare the submitted password to the stored hash
+            if check_password_hash(user.hashedPassword, plainTextPassword):
+                login_user(user)
+                return redirect(url_for('projects.blog_page')), 302
+            else:
+                return jsonify({'error': 'Invalid username or password.'}), 401
+        else:
+            # The user exists, but the password was incorrect
+            return jsonify({'error': 'Invalid username or password.'}), 401
+    else:
+        # No user with that username was found
+        return render_template('projects/blogProject/blogLogin.html', active_page = 'blog')
+    
+@projects_bp.route('/blog/logout', methods = ['POST'])
+@login_required
+def blog_logout():
+    logout_user()
+
+    return redirect(url_for('projects.blog_login_page'))
+
+    
+@projects_bp.route('/blog/register', methods = ['GET','POST'])
+def blog_register_page():
+    if request.method == 'POST':
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        username = data.get('username')
+        plainTextPassword = data.get('password')
+
+        if not username or not plainTextPassword:
+            return jsonify({'error': 'All fields are required'}), 400
+
+        user = BlogUser.query.filter_by(username = username).first()
+
+        if user:
+            return jsonify({'error': 'Username is already taken.'}), 409
+        
+        hashed_password = generate_password_hash(plainTextPassword, method='pbkdf2:sha256', salt_length=16)
+
+        new_user = BlogUser(
+            username = username,
+            hashedPassword = hashed_password
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        login_user(new_user)
+
+        return redirect(url_for('projects.blog_page'))
+
+    else:
+        return render_template('projects/blogProject/blogRegister.html', active_page = 'blog')
+    
+@projects_bp.route('/blog/register/check_username', methods = ['GET'])
+def check_username():
+    username = request.args.get('username')
+
+    user = BlogUser.query.filter_by(username = username).first()
+
+    if user:
+        is_available = False
+    else:
+        is_available = True
+
+    return jsonify({'is_available': is_available})
+
+@projects_bp.route('/blog/get_posts', methods = ['GET'])
+def get_posts():
+    all_posts = BlogPost.query.all()
+
+    posts_list = []
+
+    for post in all_posts:
+        post_dict = {
+            'id': post.id,
+            'title': post.title,
+            'content': post.content,
+            'created_at': post.created_at.strftime("%m/%d/%Y %I:%M %p"),
+            'author': post.author.username
+        }
+        posts_list.append(post_dict)
+
+    return jsonify(posts_list)
+
+@projects_bp.route('/blog/create_post', methods = ['POST'])
+@login_required
+def create_post():
+    data = request.get_json()
+
+    if not data:
+            return jsonify({'error': 'No data provided'}), 400
+    
+    postTitle = data.get('postTitle')
+    postContent = data.get('postContent')
+
+    if not postTitle or not postContent:
+            return jsonify({'error': 'Post Title and Content are required'}), 400
+    
+    new_post = BlogPost(
+        title = postTitle,
+        content = postContent,
+        author = current_user,
+        created_at = datetime.now(timezone.utc)
+    )
+
+    db.session.add(new_post)
+    db.session.commit()
+
+    return jsonify({'message': 'Pot created successfully'}), 201
+
+@projects_bp.route('/blog/account', methods = ['GET'])
+@login_required
+def blog_account_page():
+    return render_template('projects/blogProject/blogAccount.html', active_page = 'blog')
+
+@projects_bp.route('/blog/account/get_user_data_and_posts', methods = ['GET'])
+@login_required
+def get_user_data_and_posts():
+    user = current_user
+
+    userPosts = BlogPost.query.filter_by(author = user).order_by(BlogPost.created_at.desc()).all()
+
+    userPostsList = []
+
+    for post in userPosts:
+        userPostsList.append({
+            'id': post.id,
+            'title': post.title,
+            'content': post.content,
+            'created_at': post.created_at.strftime("%m/%d/%Y %I:%M %p")
+        })
+    
+    userDetailsDict = {
+        'id': user.id,
+        'username': user.username
+    }
+
+    combinedData = {
+        'user': userDetailsDict,
+        'posts': userPostsList
+    }
+    return jsonify(combinedData), 200
+

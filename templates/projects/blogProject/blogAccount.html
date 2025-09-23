@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Blog Account Page{% endblock %}
+
+{% block styles %}
+    <style>
+        .blog-page-header {
+			background-color: rgb(95, 95, 95);
+		}
+        .user-greeting{
+			color: white;
+		}
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class='py-3 bg-light text-center'>
+		<h1 class='mt-3 mb-3'>Account Details Page</h1>
+	</div>
+
+    <div id="blog-page-header" class="text-end py-2 px-4 mb-3 blog-page-header">
+		{% if current_user.is_authenticated %}
+			<span class="user-greeting me-2">Welcome, {{ current_user.username }}!</span>
+			<a href="#" id="logout-button" class="btn btn-danger me-2">Logout</a>
+			<a href="{{ url_for('projects.blog_page') }}" class="btn btn-primary me-2">Home</a>
+			<a href="{{ url_for('projects.blog_account_page') }}" class="btn btn-primary">Account</a>
+		{% endif %}
+	</div>
+
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="card mt-3 text-center" style="width:400px">
+            <div class="card-header">
+                <h4>Account Details</h4>
+            </div>
+            <div class="card-body">
+                <h6>Username:</h6>
+                <p id="username-field">test</p>
+                <h6>Number of Posts:</h6>
+                <p id="post-count-field"></p>
+                <hr>
+                <h6>Posts:</h6>
+                <div class="card mx-auto" style="width:75%">
+                    <div id="post-list" class="card-body">
+
+                    </div>
+                </div>
+                
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+
+        const postList = document.getElementById('post-list');
+        const usernameField = document.getElementById('username-field');
+        const postCountField = document.getElementById('post-count-field');
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            fetch('/projects/blog/account/get_user_data_and_posts')
+            .then(response => {
+                if(!response.ok){
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const user=data.user;
+                const posts = data.posts;
+
+                usernameField.textContent = user.username;
+                postCountField.textContent = posts.length;
+
+                posts.forEach(post => {
+                    const postListItem = document.createElement('p')
+                    postListItem.innerHTML = `
+                        <strong>Title:</strong> <a href="/projects/blog#post-${post.id}">${post.title}</a><br>
+                        <strong>Date:</strong> ${post.created_at}
+                    `;
+                    postList.appendChild(postListItem);
+                })
+                
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation', error);
+            })
+        })
+    </script>
+{% endblock %}

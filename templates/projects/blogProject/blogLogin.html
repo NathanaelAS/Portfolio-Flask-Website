@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Blog Login Page{% endblock %}
+
+{% block styles %}
+    <style>
+        .blog-page-header {
+			background-color: rgb(95, 95, 95);
+		}
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class='py-3 bg-light text-center'>
+		<h1 class='mt-3 mb-3'>Blog Login Page</h1>
+	</div>
+
+    <div id="blog-page-header" class="text-end py-2 px-4 mb-3 blog-page-header">
+        <a href="{{ url_for('projects.blog_page') }}" class="btn btn-primary me-2">Home</a>
+        <a href="{{ url_for('projects.blog_login_page') }}" class="btn btn-primary me-2">Login</a>
+        <a href="{{ url_for('projects.blog_register_page') }}" class="btn btn-primary">Register</a>
+	</div>
+
+    <div class="container my-5">
+        <div class="card p-4 mx-auto shadow" style="max-width: 400px;">
+            <h3 class="text-center mb-4">Login</h3>
+            <form id="login-form" method="POST" action="{{ url_for('projects.blog_login_page') }}">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username:</label>
+                    <input type="text" class="form-control" id="username">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" class="form-control" id="password">
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success" id="login-button">Login</button>
+                    <p class="mt-2 text-center">If you do not have an account already, please <a href="{{ url_for('projects.blog_register_page') }}">Register here</a></p>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginForm = document.getElementById('login-form');
+
+        function validateInput(inputElement) {
+            if(inputElement.value === ''){
+                inputElement.classList.remove('is-valid');
+                inputElement.classList.add('is-invalid');
+                return false;
+            }else{
+                inputElement.classList.remove('is-invalid');
+                inputElement.classList.add('is-valid');
+                return true;
+            }
+        }
+
+        function clearValidationFormatting(inputElement) {
+            inputElement.classList.remove('is-valid');
+            inputElement.classList.remove('is-invalid');
+        }
+
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const isUsernameValid = validateInput(usernameInput);
+            const isPasswordValid = validateInput(passwordInput);
+
+            if(isUsernameValid && isPasswordValid){
+                fetch('/projects/blog/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: usernameInput.value,
+                        password: passwordInput.value
+                    })
+                })
+                .then(response => {
+                    if(response.redirected){
+                        window.location.href = response.url;
+                        return;
+                    }
+
+                    if(!response.ok){
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Login failed with an unknown error');
+                        })
+                    }
+                    return response.json();
+                    
+                })
+                .catch(error => {
+                    console.error('Error', error.message);
+
+                    alert('Error: ' + error.message);
+
+                    if(passwordInput){
+                        passwordInput.value = '';
+                        clearValidationFormatting(usernameInput);
+                        clearValidationFormatting(passwordInput);
+                    }
+                });
+            }
+        });
+
+    </script>
+{% endblock %}

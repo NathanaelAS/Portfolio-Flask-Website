@@ -1,5 +1,6 @@
 from db import db
 from datetime import datetime, timezone
+from flask_login import UserMixin
 
 class TodoList(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -25,10 +26,10 @@ class ScheduleEventList(db.Model):
     def __repr__(self):
         return f"<Event {self.id}: {self.title}"
     
-class BlogUser(db.Model):
+class BlogUser(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(20), unique = True, nullable = False)
+    username = db.Column(db.String(35), unique = True, nullable = False)
     hashedPassword = db.Column(db.String(128), nullable = False)
     posts = db.relationship('BlogPost', backref = 'author', lazy = True)
 
