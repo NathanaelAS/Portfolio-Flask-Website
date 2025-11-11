@@ -3,6 +3,10 @@
 
 {% block title %}Contact{% endblock %}
 
+{% block head %}
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
+
 {% block styles %}
 	<style>
 		/* Custom styles for the button with directional fill and arrow effect */
@@ -76,6 +80,12 @@
 			cursor: default;     /* Changes the cursor */
 			opacity: 0.65;       /* Makes it look disabled */
 		}
+		.g-recaptcha {
+			/* You may need to target the iframe directly, but try this first */
+			transform: scale(0.85); 
+			/* This moves the center of the scaled element to the center of its container */
+			transform-origin: 0 0; 
+		}
 	</style>
 {% endblock %}
 
@@ -95,11 +105,19 @@
 						</i>
 						<div class="card-body">
 							<h5 class="card-title mb-3">Nathanael Spear</h5>
-							<a href="#" class="btn btn-primary disabled-link mb-3" aria-disabled="true">Download My Resume</a>
-							<div style="display: flex; gap: 10px; justify-content: center;">
+							<a href="#" id="resume-link-btn" class="btn btn-primary mb-3 disabled-link" aria-disabled="true" download>Download My Resume</a>
+							<div style="display: flex; gap: 10px; justify-content: center;" class="mb-2">
 								<a href="https://www.linkedin.com/in/nathanael-spear-577b85218" target="_blank" class="btn btn-outline-primary"><i class="fa-brands fa-linkedin me-2"></i>LinkedIn</a>
 								<a href="https://github.com/NathanaelAS" target="_blank" class="btn btn-outline-dark"><i class="fa-brands fa-github me-2"></i>Github</a>
 							</div>
+							<form id="email-form">
+								<div class="g-recaptcha" data-sitekey="6Lc4gQksAAAAAPktJ9w4xcmBx-nxHtSPB7lLHfTD"></div>
+
+								<button type="submit" id="email-reveal-button" class="btn btn-primary mt-3">Verify to Reveal Email and Download Resume</button>
+
+								<p id="email-result" class="mt-3" style="display: none;"></p>
+							</form>
+							
 						</div>
 					</div>
 				</div>
@@ -110,7 +128,59 @@
 
 {% block scripts %}
 	<script>
-		
+		document.getElementById('email-form').addEventListener('submit', function(e){
+			e.preventDefault();
+
+			const token = grecaptcha.getResponse();
+
+			if(token.length === 0){
+				alert("Please confirm you are not a robot.");
+				return;
+			}
+
+			verifyRecaptcha(token);
+		});
+
+		function verifyRecaptcha(token){
+			fetch('/projects/contact/verify-captcha', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({recaptcha_token: token})
+			})
+			.then(response => response.json())
+			.then(data => {
+				const resultElement = document.getElementById('email-result');
+				const revealButton = document.getElementById('email-reveal-button');
+
+				const resumeButton = document.getElementById('resume-link-btn');
+
+				if(data.success){
+					const email = "nathanaelaspear@gmail.com";
+
+					resultElement.innerHTML = `Email: <a href="mailto:${email}">${email}</a>`;
+					resultElement.style.display = 'block';
+					revealButton.style.display = 'none';
+
+					if(resumeButton){
+						resumeButton.classList.remove('disabled-link');
+						resumeButton.removeAttribute('aria-disabled');
+					}
+
+					alert('Verification successful! The email address is now visible.');
+				} else{
+					resultElement.innerHTML = `<span style="color:red;">Verification failed. Please try again.</span>`;
+					resultElement.style.display= 'block';
+
+					grecaptcha.reset();
+				}
+			})
+			.catch(error => {
+				console.error('Error', error);
+				alert('A network error occured during verification.');
+			});
+		}
 	</script>
 {% endblock %}
 	

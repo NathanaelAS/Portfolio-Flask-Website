@@ -4,12 +4,48 @@ from models import TodoList, ScheduleEventList, BlogUser, BlogPost
 from datetime import datetime, timedelta, time, timezone
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
+import os
 
 projects_bp = Blueprint('projects', __name__, url_prefix='/projects')
+
+RECAPTCHA_SECRET_KEY = os.environ.get('RECAPTCHA_SECRET_KEY')
 
 @projects_bp.route('/projectOverview')
 def projectOverview_page():
     return render_template('projects/projectOverview.html', active_page = 'projectOverview')
+
+@projects_bp.route('/contact/verify-captcha', methods=['POST'])
+def verify_captcha():
+    try:
+        data = request.get_json()
+        token = data.get('recaptcha_token')
+    except Exception:
+        return jsonify({'success': False, 'error': 'Invalid JSON data'}), 400
+    
+    if not token:
+        return jsonify({'success': False, 'error': 'No token provided'}), 400
+    
+    payload = {
+        'secret': RECAPTCHA_SECRET_KEY,
+        'response': token,
+        'remoteip': request.remote_addr
+    }
+
+    try:
+        response = requests.post('https://www.google.com/recaptcha/api/siteverify', data=payload)
+        response.raise_for_status()
+        result = response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Google API Request failed: {e}")
+        return jsonify({'success': False, 'error': 'Google API communication failed'}), 500
+    
+    if result.get('success'):
+        return jsonify({'success': True}), 200
+    else:
+        print(f"reCAPTCHA verification failed. Error codes: {result.get('error-codes')}")
+        return jsonify({'success': False, 'error': 'reCAPTCHA failed'}), 200
+    
 
 @projects_bp.route('/taskManager', methods = ['POST', 'GET'])
 def taskManager_page():

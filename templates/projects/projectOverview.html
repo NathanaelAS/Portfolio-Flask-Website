@@ -84,10 +84,20 @@
 		  <div class="col-md-4 mb-4">
 			<div class="card h-100 shadow-sm">
 			  <div class="card-body">
-				<h5 class="card-title text-muted">Blog Project <span class="badge bg-warning text-dark">Coming Soon</span></h5>
-				<p class="card-text"></p>
-				<span class="badge bg-secondary me-1 badge-lg"></span>
-				<span class="badge bg-secondary badge-lg"></span>
+				<h5 class="card-title">Blog Project<i class="fa-solid fa-comments ms-2"></i></h5>
+				<p class="card-text">A secure, full-stack <strong>Blog and Content Management Platform</strong> built with Flask (Python). Users can register, log in, and utilize a dedicated dashboard to create, edit, and delete their own posts. The frontend employs dynamic JavaScript to render content and enable seamless navigation without full page reloads.</p>
+				<span class="badge bg-secondary me-1 badge-lg mb-1">	
+					<i class="devicon-python-plain"></i>
+					Python
+				</span>
+				<span class="badge bg-secondary badge-lg mb-1">
+					<i class="devicon-flask-original"></i>
+					Flask
+				</span>
+				<span class="badge bg-secondary me-1 badge-lg mb-1" >
+					<i class="devicon-sqlalchemy-plain"></i>
+					SQLAlchemy
+				</span>
 			  </div>
 			  <div class="card-footer bg-white border-0">
 				<a href="{{ url_for('projects.blog_page') }}" class="btn btn-outline-primary w-100">View Project</a>
